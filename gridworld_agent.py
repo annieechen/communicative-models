@@ -14,43 +14,37 @@ class GridWorldAgent(object):
 	def __init__(self, width=10, height=10, diagonal=True):
 		self.map = Map()
 		# fill states, transition, actions
-		self.s, self.t, self.A = self.map.BuildGridWorld(width, height, diagonal)
-		self.r = _CreateRewards(self,)
+		self.width = width
+		self.height = height
+		self.s, self.t, self.a = self.map.BuildGridWorld(width, height, diagonal)
+		self.r = self._CreateRewards()
 		self.mdp = MDP(self.s,self.a,self.t,self.r)
-		if not self.mdp.Validate():
+		# pdb.set_trace()
+		if not self.map.Validate():
 			raise AssertionError
 		self.initDisplay()
 
-	def _CreateRewards(self, valsDict = {}):
+	def _CreateRewards(self, rewardValues=False):
+		"""
+		valsDict (dictionary): maps (x,y) to reward of state
+		"""
+		# initialize to default
+		if not rewardValues:
+			rewardValues = {(1,1):10, (self.width//2, self.height//2): -10}
 		states = self.s
 		actions = self.a
-		trans = np.zeros((len(states), len(actions), len(states)))
-		rewards = np.full((len(self.a), len(self.states)), 0)
-		edge_probabilites = []
-		edge_action_labels = {}
-		for curr_state in states: # how many chips you have now
-			for action in actions: # action = # chips bet
-				# if not possible, go to lose
-				if action > curr_state:
-					trans[(curr_state, action, 0 )] = 1
-				else:
-					# if betting 0 
-					if action == 0:
-						trans[(curr_state, action, curr_state)] = 1
-					else:
-						# if you win
-						next_state =  min(action + curr_state, self.num_win_chips)
-						trans[(curr_state, action, next_state)] = self.win_prob
-						edge_probabilites.append((curr_state, next_state, self.win_prob))
-						edge_action_labels[(curr_state, next_state)] = action
-						# if you lose 
-						trans[(curr_state, action, curr_state - action)] = 1 - self.win_prob
-						edge_probabilites.append((curr_state, curr_state - action, 1 - self.win_prob))
-						edge_action_labels[(curr_state, curr_state - action)] = action
-
-		for action in actions:
-			rewards[action, 0] = -10
-			rewards[action, self.num_win_chips] = 10
+		rewards = np.full((len(self.a), len(self.s)), 0)
+		# transform coordinates to states
+		stateRewards = {}
+		for coord, val in rewardValues.iteritems():
+			state = self.map.GetRawStateNumber(coord)
+			stateRewards[state] = val
+		# loop through all states and actions, if they reach a reward, set it
+		for curr_state in states: 
+			for action in actions: 
+				next_state = self.map.makeMove(curr_state, action)
+				if next_state in stateRewards:
+					rewards[action, curr_state] = stateRewards[next_state]
 		return rewards
 	def Run(self):
 		self.mdp.ValueIteration()

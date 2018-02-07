@@ -190,7 +190,16 @@ class Map(object):
                     self.T[i, 7, i] = 1
                 else:
                     self.T[i, 7, i + x + 1] = 1
-        return self.S, Self.T, self.A
+        return self.S, self.T, self.A
+
+
+    def makeMove(self, state, action, diagonal=True):
+        """
+        Takes a state and action, returns the next state it'll go to 
+        (assumes nonprobabalistic)
+         T (matrix): Transition matrix. T[SO,A,SF] contains the probability that agent will go from SO to SF after taking action A.
+        """
+        return np.argmax(self.T[state, action]) 
 
     def InsertSquare(self, topleftx, toplefty, width, height, value):
         """
