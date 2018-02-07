@@ -144,10 +144,10 @@ class Map(object):
             self.ObjectNames = [
                 "Object " + str(i) for i in set(self.ObjectTypes)]
         # From, With, To. Add one for the dead state
-        self.T = np.zeros((len(self.S) + 1, len(self.A), len(self.S) + 1))
+        self.T = np.zeros((len(self.S), len(self.A), len(self.S)))
         # First create dead state structure. All actions leave agent in same
         # place.
-        self.T[len(self.S), :, len(self.S)] = 1
+        # self.T[len(self.S), :, len(self.S)] = 1
         # Make all states of the same type
         self.StateTypes = [0] * (len(self.S))
         for i in range(len(self.S)):
@@ -199,7 +199,9 @@ class Map(object):
         (assumes nonprobabalistic)
          T (matrix): Transition matrix. T[SO,A,SF] contains the probability that agent will go from SO to SF after taking action A.
         """
-        return np.argmax(self.T[state, action]) 
+
+        x =  np.argmax(self.T[state, action]) 
+        return x
 
     def InsertSquare(self, topleftx, toplefty, width, height, value):
         """
