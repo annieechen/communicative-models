@@ -6,7 +6,7 @@ from mdp import MDP
 import pdb
 
 
-WINNING_PROB = 0.1
+WINNING_PROB = 0.6
 NUM_WIN_CHIPS = 10
 
 class BettingAgent(object):
@@ -29,7 +29,7 @@ class BettingAgent(object):
 		states = list(range(self.num_win_chips + 1)) 
 		actions = list(range(self.num_win_chips + 1)) 
 		trans = np.zeros((len(states), len(actions), len(states)))
-		rewards = np.zeros((len(actions), len(states)))
+		rewards = np.full((len(actions), len(states)), 0)
 		edge_probabilites = []
 		edge_action_labels = {}
 		for curr_state in states: # how many chips you have now

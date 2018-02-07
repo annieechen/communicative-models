@@ -15,7 +15,7 @@ import random
 
 class MDP(object):
 
-    def __init__(self, S=[], A=[], T=[], R=[], gamma=0.95, tau=0.01):
+    def __init__(self, S=[], A=[], T=[], R=[], gamma=0.1, tau=0.01):
         """
         Markov Decision Process (MDP) class.
 
