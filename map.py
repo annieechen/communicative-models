@@ -279,6 +279,8 @@ class Map(object):
         for i in range(len(Actions)):
             ActionNames[i] = self.ActionNames[Actions[i]]
         return ActionNames
+    def GetActionName(self, ActionNumber):
+        return self.ActionNames[ActionNumber]
 
     def GetRawStateNumber(self, Coordinates):
         """
@@ -308,14 +310,14 @@ class Map(object):
             State (int): State id
 
         Returns
-            Coordinates (list): x and y coordinates ([x,y])
+            Coordinates (tuple): x and y coordinates ([x,y])
         """
         if (State >= len(self.S)):
             print("ERROR: State out of bound. MAP-015")
             return None
         yval = int(math.floor(State * 1.0 / self.mapwidth)) + 1
         xval = State - self.mapwidth * (yval - 1) + 1
-        return [xval, yval]
+        return (xval, yval)
 
     def InsertObjects(self, Locations, ObjectTypes, Organic, ObjectNames=None, SurvivalProb=1):
         """

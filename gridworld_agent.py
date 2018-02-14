@@ -8,15 +8,19 @@ import pdb
 
 
 class GridWorldAgent(object):
-	def __init__(self, rewardWhenReached, width=10, height=10, diagonal=True, rewardValues = None):
+	def __init__(self, rewardWhenReached = False, width=10, height=10, diagonal=True, rewardValues = None):
 		self.map = Map()
 		# fill states, transition, actions
 		self.width = width
 		self.height = height
 		self.s, self.t, self.a = self.map.BuildGridWorld(width, height, diagonal)
 		self.rewardWhenReached = rewardWhenReached
+
+		# list of coordinates(1 indexed) with rewards
+		self.rewardLocations = None
 		self.r = self._CreateRewards(rewardValues)
 		self.mdp = MDP(self.s,self.a,self.t,self.r)
+		self.policy = None
 		# pdb.set_trace()
 		if not self.mdp.Validate():
 			raise AssertionError
@@ -29,6 +33,7 @@ class GridWorldAgent(object):
 		# initialize to default
 		if not rewardValues:
 			rewardValues = {(1,1):10, (self.width,self.height): -10}
+		self.rewardLocations = rewardValues
 		states = self.s
 		actions = self.a
 		rewards = np.full((len(self.a), len(self.s)), 0)
@@ -52,11 +57,13 @@ class GridWorldAgent(object):
 					rewards[action, state] = val
 		
 		return rewards
-	def Run(self):
+
+	def Run(self, display=False):
 		self.mdp.ValueIteration()
 		self.mdp.BuildPolicy()
 		self.getMoves()
-		self.Display()
+		if display:
+			self.Display()
 		
 
 	def getMoves(self, print_moves = True):
@@ -67,41 +74,67 @@ class GridWorldAgent(object):
 		if print_moves:
 			print("best move at each state")
 			policy_names = self.map.GetActionNames(policy)
-			print(policy_names.reshape((self.width, self.height)))
+			print(policy_names.reshape((self.height, self.width)))
 		self.policy = policy
 		return policy
 
-	def Display(self, showpolicy=True):
-		data = self.mdp.values.reshape((self.width, self.height))
-		# pdb.set_trace()
+
+	def Display(self, showpolicy=False, path_list=None):
+		data = self.mdp.values.reshape((self.height, self.width))
 		fig, ax = plt.subplots()
 		ax.matshow(data, cmap='Greens')
-		for (i, j), z in np.ndenumerate(data):
-			ax.text(j, i, '{:0.1f}'.format(z), ha='right', va='top')
+		if showpolicy:
+			for (y, x), z in np.ndenumerate(data):
+				if (x + 1, y + 1,) in path_list:
+					ax.annotate( '{:0.1f}'.format(z), xy=(x , y), xycoords='data', backgroundcolor='white')
+				else:
+					ax.annotate( '{:0.1f}'.format(z), xy=(x , y), xycoords='data')
+		# don't change colors
+		else:
+			for (y, x), z in np.ndenumerate(data):
+				ax.annotate( '{:0.1f}'.format(z), xy=(x , y), xycoords='data')#, ha='right', va='top')
+		# highlight reward values
+		# pdb.set_trace()
+		for state, val in self.rewardLocations.iteritems():
+			x,y = state
+			if val > 0:
+				color = 'green'
+			else:
+				color = 'red'
+			ax.annotate('{:0.1f}'.format(val), xy=(x - 1, y - .7), color=color, backgroundcolor='black')
+
 		# plt.set(h, 'EdgeColor' = 'b')
 		# annotate
 		plt.show()
 
 
 	# start_coordinates = (x,y) tuple
-	def CreatePolicyPath(self, start_coordinates, max_path_length=10):
+	def CreatePolicyPath(self, start_coordinates, max_path_length=10, print_path=False):
 		# if getMoves hasn't been called yet
 		if not self.policy:
 			self.getMoves(False)
 		curr_state = self.map.GetRawStateNumber(start_coordinates)
 		num_steps = 0
 		path_list = []
+		action_list = []
 		while num_steps < max_path_length:
-			path_list.append(curr_state)
 			# move to next state
-			best_action = 
+			best_action = self.policy[curr_state]
+			path_list.append(self.map.GetCoordinates(curr_state))
+			action_list.append(best_action)
+			curr_state = self.map.makeMove(curr_state, best_action)
 			num_steps += 1
+		if print_path:
+			for i in range(max_path_length):
+				print(str(path_list[i]) + str(action_list[i]))
+		self.Display(showpolicy = True, path_list = path_list)
+		return action_list, path_list
 
 
 
 if __name__ == "__main__":
-	a =  GridWorldAgent(6,6)
-	a.Run()
+	a =  GridWorldAgent(width=3,height=4, rewardValues = {(2,4):10, (3,1): -20})
+	a.Run(display = True)
 
 
 
