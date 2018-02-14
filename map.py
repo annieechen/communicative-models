@@ -10,6 +10,7 @@ __license__ = "MIT"
 import numpy as np
 import sys
 import math
+import pdb
 
 
 class Map(object):
@@ -273,7 +274,8 @@ class Map(object):
         Returns
             Actions (list): List of action names
         """
-        ActionNames = [0] * len(Actions)
+        ActionNames = np.chararray(len(Actions))
+        # pdb.set_trace()
         for i in range(len(Actions)):
             ActionNames[i] = self.ActionNames[Actions[i]]
         return ActionNames

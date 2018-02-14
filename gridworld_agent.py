@@ -7,29 +7,28 @@ from map import Map
 import pdb
 
 
-"""
-todo:
-"""
 class GridWorldAgent(object):
-	def __init__(self, width=10, height=10, diagonal=True):
+	def __init__(self, rewardWhenReached, width=10, height=10, diagonal=True, rewardValues = None):
 		self.map = Map()
 		# fill states, transition, actions
 		self.width = width
 		self.height = height
 		self.s, self.t, self.a = self.map.BuildGridWorld(width, height, diagonal)
-		self.r = self._CreateRewards()
+		self.rewardWhenReached = rewardWhenReached
+		self.r = self._CreateRewards(rewardValues)
 		self.mdp = MDP(self.s,self.a,self.t,self.r)
 		# pdb.set_trace()
 		if not self.mdp.Validate():
 			raise AssertionError
 
-	def _CreateRewards(self, rewardValues=False, test=True):
+	# rewardWhenReached = true, then
+	def _CreateRewards(self, rewardValues=False):
 		"""
 		valsDict (dictionary): maps (x,y) to reward of state
 		"""
 		# initialize to default
 		if not rewardValues:
-			rewardValues = {(1,1):10, (self.width, self.height): -10}
+			rewardValues = {(1,1):10, (self.width,self.height): -10}
 		states = self.s
 		actions = self.a
 		rewards = np.full((len(self.a), len(self.s)), 0)
@@ -40,39 +39,43 @@ class GridWorldAgent(object):
 			print("coord: " + str(coord) + " state: " + str(state) + " val: " + str(val))
 			stateRewards[state] = val
 		# loop through all states and actions, if they reach a reward, set it
-		if test:
-			for state, val in stateRewards.iteritems():
-				for action in actions:
-					rewards[action, state] = val
-		else:
+		if self.rewardWhenReached:
 			for curr_state in states: 
 				for action in actions: 
 					next_state = self.map.makeMove(curr_state, action)
 					if next_state in stateRewards:
 						rewards[action, curr_state] = stateRewards[next_state]
+		# any action they take in reward state = reward
+		else:
+			for state, val in stateRewards.iteritems():
+				for action in actions:
+					rewards[action, state] = val
+		
 		return rewards
 	def Run(self):
 		self.mdp.ValueIteration()
-		# self.mdp.BuildPolicy()
-		self.mdp.Display(True)
+		self.mdp.BuildPolicy()
+		self.getMoves()
 		self.Display()
 		
 
-	def getMoves(self):
+	def getMoves(self, print_moves = True):
 		policy_mat = self.mdp.policy.transpose()
 		policy = [0 for i in self.s]
 		for i in range(len(policy)):
 			policy[i] = np.argmax(policy_mat[i])
-		# print("best move at each state")
-		# print(policy)
-
+		if print_moves:
+			print("best move at each state")
+			policy_names = self.map.GetActionNames(policy)
+			print(policy_names.reshape((self.width, self.height)))
+		self.policy = policy
 		return policy
 
 	def Display(self, showpolicy=True):
 		data = self.mdp.values.reshape((self.width, self.height))
 		# pdb.set_trace()
 		fig, ax = plt.subplots()
-		ax.matshow(data, cmap='winter')
+		ax.matshow(data, cmap='Greens')
 		for (i, j), z in np.ndenumerate(data):
 			ax.text(j, i, '{:0.1f}'.format(z), ha='right', va='top')
 		# plt.set(h, 'EdgeColor' = 'b')
@@ -80,49 +83,24 @@ class GridWorldAgent(object):
 		plt.show()
 
 
-		# labels = {}
-		# # pdb.set_trace()
-		# values = self.mdp.values.tolist()[0]
-		# node_colors = [0 for i in range(self.num_win_chips+1)]
-		# # create node labels
-		# for state in self.mdp.S:
-		# 	labels[state] = str(state) + " \n " + str(round(values[state],2))
-		# 	node_colors[state] = -1 * values[state] 
-		# # draw nodes
-		# nx.draw_networkx_nodes(self.graph, self.graph_pos,node_color=node_colors)
-		# nx.draw_networkx_labels(self.graph, self.graph_pos, labels=labels) #, labels = self.node_labels)
+	# start_coordinates = (x,y) tuple
+	def CreatePolicyPath(self, start_coordinates, max_path_length=10):
+		# if getMoves hasn't been called yet
+		if not self.policy:
+			self.getMoves(False)
+		curr_state = self.map.GetRawStateNumber(start_coordinates)
+		num_steps = 0
+		path_list = []
+		while num_steps < max_path_length:
+			path_list.append(curr_state)
+			# move to next state
+			best_action = 
+			num_steps += 1
 
-		# # choose which edge to show
-		# edge_labels = None
-		# edge_colors = []
-		# if showpolicy:
-		# 	moves = self.getMoves()
-		# 	edge_list, edge_labels = [], {}
-		# 	for i, move in enumerate(moves):
-		# 		# if you win
-		# 		edge_list.append((i, i + move)) #initial state, state + move
-		# 		edge_labels[(i, i + move)] = move
-		# 		edge_colors.append('g')
-		# 		# if you lose
-		# 		edge_list.append((i, max(0, i - move))) #initial state, state + move
-		# 		edge_labels[(i, max(0, i - move))] = move
-		# 		edge_colors.append('r')
-		# 	self.graph.add_edges_from(edge_list)
-		# 	# edge_colors = 'r'
-		# else: # show probabilities
-		# 	self.graph.add_weighted_edges_from(self.edge_probabilites)
-		# 	for edge in self.graph.edges():
-		# 		# pdb.set_trace()
-		# 		edge_colors.append(self.edge_action_labels[edge])
-		# 	edge_labels = self.edge_action_labels
-		
-		# nx.draw_networkx_edges(self.graph, self.graph_pos, edge_color=edge_colors)
-		# nx.draw_networkx_edge_labels(self.graph, self.graph_pos, edge_labels=edge_labels)
-		# plt.show()
-		# # TODO clear edges
+
 
 if __name__ == "__main__":
-	a =  GridWorldAgent(4,4)
+	a =  GridWorldAgent(6,6)
 	a.Run()
 
 
