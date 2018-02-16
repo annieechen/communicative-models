@@ -22,6 +22,7 @@ class RewardGuesser(object):
 		for i in range(len(self.S)):
 			# initialize a reward matrix to all 0s
 			reward_matrix = self.createRewards(i, 20)
+			print("i is " + str(i))
 			prob = self.getProbActionsToRewards(reward_matrix, action_list, path_list)
 			rewardsToProbs[i] = prob
 
@@ -43,7 +44,6 @@ class RewardGuesser(object):
 		mdp.BuildPolicy()
 		probabilities = mdp.policy
 		# print(probabilities)
-		print(probabilities.shape)
 		return probabilities
 
 	# def getProbAction(self, probabilities, state, action):
@@ -51,17 +51,20 @@ class RewardGuesser(object):
 
 	def getProbActionsToRewards(self, reward_matrix, action_list, path_list):
 		prob = 1.0
-		pdb.set_trace()
 		# build the polic)es for this reward matrix
 		probabilities = self.getProbActions(reward_matrix)
 		for i in range(len(action_list)):
 			action, state = action_list[i], path_list[i]
+			# print(prob)
+			print(probabilities[action, state])
+			# pdb.set_trace()
 			prob *= probabilities[action,state]
 		return prob
 
 if __name__ == "__main__":
-	a = GridWorldAgent(True, 3,3)
+	a = GridWorldAgent(False, 3,3,rewardValues =  {(1,1):10})
 	a.Run()
+	pdb.set_trace()
 	action_list, path_list = a.CreatePolicyPath((3,3),max_path_length = 4,  print_path=True)
 	c = RewardGuesser(a.map.T, a.map.S)
 	c.guessReward(action_list, path_list)

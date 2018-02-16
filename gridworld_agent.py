@@ -9,7 +9,7 @@ import pdb
 
 class GridWorldAgent(object):
 	def __init__(self, rewardWhenReached = False, width=10, height=10, diagonal=True, rewardValues = None):
-		self.map = Map()
+		self.map = Map(diagonal=True)
 		# fill states, transition, actions
 		self.width = width
 		self.height = height
@@ -94,7 +94,6 @@ class GridWorldAgent(object):
 			for (y, x), z in np.ndenumerate(data):
 				ax.annotate( '{:0.1f}'.format(z), xy=(x , y), xycoords='data')#, ha='right', va='top')
 		# highlight reward values
-		# pdb.set_trace()
 		for state, val in self.rewardLocations.iteritems():
 			x,y = state
 			if val > 0:
@@ -102,9 +101,6 @@ class GridWorldAgent(object):
 			else:
 				color = 'red'
 			ax.annotate('{:0.1f}'.format(val), xy=(x - 1, y - .7), color=color, backgroundcolor='black')
-
-		# plt.set(h, 'EdgeColor' = 'b')
-		# annotate
 		plt.show()
 
 

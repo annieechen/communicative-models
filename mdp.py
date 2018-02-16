@@ -15,14 +15,13 @@ import random
 
 class MDP(object):
 
-    def __init__(self, S=[], A=[], T=[], R=[], gamma=0.98, tau=0.1):
+    def __init__(self, S=[], A=[], T=[], R=[], gamma=0.95, tau=0.01):
         """
         Markov Decision Process (MDP) class.
 
         Args:
             S (list): List of states
             A (list): List of actions
-            T (matrix): Transition matrix where T[SO,A,SF] is the probability of moving from So to SF after taking action A
             R (matrix): Reward function where R[A,S] is the reward for taking action A in state S
             gamma (float): Future discount
             tau (float): Softmax parameter
