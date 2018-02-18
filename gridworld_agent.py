@@ -111,20 +111,22 @@ class GridWorldAgent(object):
 			self.getMoves(False)
 		curr_state = self.map.GetRawStateNumber(start_coordinates)
 		num_steps = 0
-		path_list = []
+		state_path_list = []
+		coord_path_list = []
 		action_list = []
 		while num_steps < max_path_length:
 			# move to next state
 			best_action = self.policy[curr_state]
-			path_list.append(self.map.GetCoordinates(curr_state))
+			state_path_list.append(curr_state)
+			coord_path_list.append(self.map.GetCoordinates(curr_state))
 			action_list.append(best_action)
 			curr_state = self.map.makeMove(curr_state, best_action)
 			num_steps += 1
 		if print_path:
 			for i in range(max_path_length):
-				print(str(path_list[i]) + str(action_list[i]))
-		self.Display(showpolicy = True, path_list = path_list)
-		return action_list, path_list
+				print(str(coord_path_list[i]) + str(action_list[i]))
+		self.Display(showpolicy = True, path_list = coord_path_list)
+		return action_list, coord_path_list, state_path_list
 
 
 

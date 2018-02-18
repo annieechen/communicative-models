@@ -65,6 +65,7 @@ if __name__ == "__main__":
 	a = GridWorldAgent(False, 3,3,rewardValues =  {(1,1):10})
 	a.Run()
 	pdb.set_trace()
-	action_list, path_list = a.CreatePolicyPath((3,3),max_path_length = 4,  print_path=True)
+	# don't need the coordinate path list 
+	action_list,_, path_list = a.CreatePolicyPath((3,3),max_path_length = 4,  print_path=True)
 	c = RewardGuesser(a.map.T, a.map.S)
 	c.guessReward(action_list, path_list)
