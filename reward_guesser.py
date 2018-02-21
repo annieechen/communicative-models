@@ -36,38 +36,18 @@ class RewardGuesser(object):
 		# now go through and guess each value
 		final_list = [None] * len_reward
 		for i in range(len_reward):
-			r, p , n = 0.0,0.0,0.0
-			n_r, n_p, n_n = 0,0,0
+			expected_value = 0.0
 			# go through all samples
 			for j in range(num_samples):
-				if sample_matrices[j][0][i] > 0:
-					r += sample_probabilites[j]
-					n_r += 1
-				elif sample_matrices[j][0][i] < 0:
-					p += sample_probabilites[j]
-					n_p += 1
-				else:
-					n  += sample_probabilites[j]
-					n_n += 1
-			r = r/ (n_r or 1)
-			p = p/ (n_p or 1)
-			n = n/ (n_n or 1)
-			# print(r,p,n)
-			# print(n_r, n_p, n_n)
-			# get biggest
-			if n == max(r,p,n):
-				final_list[i] = 0
-			elif r == max(r,p,n):
-				final_list[i] = 10
-			else:
-				final_list[i] = -10
+				expected_value += sample_matrices[j][0][i] * sample_probabilites[j]
+			final_list[i] = expected_value * 10
 		final_matrix = self.createRewardMatrix(final_list)
 		# validate probabilites
 		max_from_samples = max(sample_probabilites)
 		final_probability = self.getProbActionsToRewards(final_matrix)
 		print(max_from_samples)
 		print(final_probability)
-	
+
 		return final_list
 
 		
@@ -165,7 +145,7 @@ class RewardGuesser(object):
 				color = 'green'
 			else:
 				color = 'red'
-			ax.annotate(str(val), xy=(x - 1, y - .7), color=color, backgroundcolor='black')
+			ax.annotate(str(val), xy=(x, y - .3), color=color, backgroundcolor='black')
 
 
 	# generates a random number with 4 times as much likelyhood first # as second two
