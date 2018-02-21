@@ -22,12 +22,13 @@ class RewardGuesser(object):
 		for i in range(len(self.S)):
 			# initialize a reward matrix to all 0s
 			reward_matrix = self.createRewards(i, 20)
-			print("i is " + str(i))
 			prob = self.getProbActionsToRewards(reward_matrix, action_list, path_list)
 			rewardsToProbs[i] = prob
 
 		# get reward function with highest probability
-		# print(max(rewardsToProbs, key=rewardsToProbs.get))
+		max_prob = max(rewardsToProbs, key=rewardsToProbs.get)
+		max_keys = [x for x, v in rewardsToProbs.iteritems() if v == rewardsToProbs[max_prob]]
+		print("best prob states " + str(max_keys) + "=" + str(max_prob))
 		return rewardsToProbs
 
 	def createRewards(self, i, val):
@@ -55,9 +56,6 @@ class RewardGuesser(object):
 		probabilities = self.getProbActions(reward_matrix)
 		for i in range(len(action_list)):
 			action, state = action_list[i], path_list[i]
-			# print(prob)
-			print(probabilities[action, state])
-			# pdb.set_trace()
 			prob *= probabilities[action,state]
 		return prob
 

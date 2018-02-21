@@ -9,24 +9,37 @@ import pdb
 
 class GridWorldAgent(object):
 	def __init__(self, rewardWhenReached = False, width=10, height=10, diagonal=True, rewardValues = None):
+		 """
+		This class stores the values for the gridworld, and allows for creating paths/visualizing 
+
+        Args:
+            rewardWhenReached (bool): if true, creates reward matrix so reward when in state. Else, when enters state
+            width, height(bool): size of gridworld (to be passed to map)
+            diagonal (bool): whether agents can travel diagonally 
+            rewardValues (dict): (x,y) tuples to values of squares, passed to _CreateRewards
+            s (list): List of states.
+            a (list): List of actions available.
+           	rewardLocations(dict): list of coordinates(1 indexed) with rewards <- should be same as reward values
+            diagonal (boolean): Determines if agents can travel diagonally.
+            t (matrix): Transition matrix. T[SO,A,SF] contains the probability that agent will go from SO to SF after taking action A.
+            policy_moves(list): move to take in each state given maxing
+        """
 		self.map = Map(diagonal=True)
 		# fill states, transition, actions
 		self.width = width
 		self.height = height
 		self.s, self.t, self.a = self.map.BuildGridWorld(width, height, diagonal)
-		self.rewardWhenReached = rewardWhenReached
 
-		# list of coordinates(1 indexed) with rewards
+		self.rewardWhenReached = rewardWhenReached
 		self.rewardLocations = None
 		self.r = self._CreateRewards(rewardValues)
 		self.mdp = MDP(self.s,self.a,self.t,self.r)
-		self.policy = None
+		self.policy_moves = None
 		# pdb.set_trace()
 		if not self.mdp.Validate():
 			raise AssertionError
 
-	# rewardWhenReached = true, then
-	def _CreateRewards(self, rewardValues=False):
+	def _CreateRewards(self, rewardValues=False, display=False):
 		"""
 		valsDict (dictionary): maps (x,y) to reward of state
 		"""
@@ -34,19 +47,18 @@ class GridWorldAgent(object):
 		if not rewardValues:
 			rewardValues = {(1,1):10, (self.width,self.height): -10}
 		self.rewardLocations = rewardValues
-		states = self.s
-		actions = self.a
 		rewards = np.full((len(self.a), len(self.s)), 0)
 		# transform coordinates to states
 		stateRewards = {}
 		for coord, val in rewardValues.iteritems():
 			state = self.map.GetRawStateNumber(coord)
-			print("coord: " + str(coord) + " state: " + str(state) + " val: " + str(val))
+			if display:
+				print("coord: " + str(coord) + " state: " + str(state) + " val: " + str(val))
 			stateRewards[state] = val
 		# loop through all states and actions, if they reach a reward, set it
 		if self.rewardWhenReached:
-			for curr_state in states: 
-				for action in actions: 
+			for curr_state in self.s: 
+				for action in self.a: 
 					next_state = self.map.makeMove(curr_state, action)
 					if next_state in stateRewards:
 						rewards[action, curr_state] = stateRewards[next_state]
@@ -67,6 +79,11 @@ class GridWorldAgent(object):
 		
 
 	def getMoves(self, print_moves = True):
+		# check to make sure ValueIteration and BuildPolicy are called
+		if not a.any(self.mdp.values):
+			self.mdp.ValueIteration()
+		if not a.any(self.mdp.policy):
+			self.mdp.BuildPolicy()
 		policy_mat = self.mdp.policy.transpose()
 		policy = [0 for i in self.s]
 		for i in range(len(policy)):
@@ -86,7 +103,7 @@ class GridWorldAgent(object):
 		if showpolicy:
 			for (y, x), z in np.ndenumerate(data):
 				if (x + 1, y + 1,) in path_list:
-					ax.annotate( '{:0.1f}'.format(z), xy=(x , y), xycoords='data', backgroundcolor='white')
+					ax.annotate( '{:0.1f}'.format(z), xy=(x , y), xycoords='data', backgroundcolor='purple')
 				else:
 					ax.annotate( '{:0.1f}'.format(z), xy=(x , y), xycoords='data')
 		# don't change colors
@@ -102,7 +119,6 @@ class GridWorldAgent(object):
 				color = 'red'
 			ax.annotate('{:0.1f}'.format(val), xy=(x - 1, y - .7), color=color, backgroundcolor='black')
 		plt.show()
-
 
 	# start_coordinates = (x,y) tuple
 	def CreatePolicyPath(self, start_coordinates, max_path_length=10, print_path=False):
