@@ -89,6 +89,9 @@ class MDP(object):
         if self.A != range(actions):
             print("ERROR: Actions are not correctly numbered. MDP-004")
             return 0
+        if self.R.shape != (actions, states):
+			print("ERROR: Reward matrix does not match")
+			return 0
         if (dims[1] != actions):
             print("ERROR: Transition matrix does not match number of actions. MDP-005")
             return 0
