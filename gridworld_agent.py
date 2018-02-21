@@ -9,21 +9,21 @@ import pdb
 
 class GridWorldAgent(object):
 	def __init__(self, rewardWhenReached = False, width=10, height=10, diagonal=True, rewardValues = None):
-		 """
+		"""
 		This class stores the values for the gridworld, and allows for creating paths/visualizing 
 
-        Args:
-            rewardWhenReached (bool): if true, creates reward matrix so reward when in state. Else, when enters state
-            width, height(bool): size of gridworld (to be passed to map)
-            diagonal (bool): whether agents can travel diagonally 
-            rewardValues (dict): (x,y) tuples to values of squares, passed to _CreateRewards
-            s (list): List of states.
-            a (list): List of actions available.
-           	rewardLocations(dict): list of coordinates(1 indexed) with rewards <- should be same as reward values
-            diagonal (boolean): Determines if agents can travel diagonally.
-            t (matrix): Transition matrix. T[SO,A,SF] contains the probability that agent will go from SO to SF after taking action A.
-            policy_moves(list): move to take in each state given maxing
-        """
+		Args:
+			rewardWhenReached (bool): if true, creates reward matrix so reward when in state. Else, when enters state
+			width, height(bool): size of gridworld (to be passed to map)
+			diagonal (bool): whether agents can travel diagonally 
+			rewardValues (dict): (x,y) tuples to values of squares, passed to _CreateRewards
+			s (list): List of states.
+			a (list): List of actions available.
+			rewardLocations(dict): list of coordinates(1 indexed) with rewards <- should be same as reward values
+			diagonal (boolean): Determines if agents can travel diagonally.
+			t (matrix): Transition matrix. T[SO,A,SF] contains the probability that agent will go from SO to SF after taking action A.
+			policy_moves(list): move to take in each state given maxing
+		"""
 		self.map = Map(diagonal=True)
 		# fill states, transition, actions
 		self.width = width
@@ -34,7 +34,8 @@ class GridWorldAgent(object):
 		self.rewardLocations = None
 		self.r = self._CreateRewards(rewardValues)
 		self.mdp = MDP(self.s,self.a,self.t,self.r)
-		self.policy_moves = None
+		# self.policy_moves = None
+		self.policy = None
 		# pdb.set_trace()
 		if not self.mdp.Validate():
 			raise AssertionError
@@ -65,7 +66,7 @@ class GridWorldAgent(object):
 		# any action they take in reward state = reward
 		else:
 			for state, val in stateRewards.iteritems():
-				for action in actions:
+				for action in self.a:
 					rewards[action, state] = val
 		
 		return rewards
@@ -80,9 +81,9 @@ class GridWorldAgent(object):
 
 	def getMoves(self, print_moves = True):
 		# check to make sure ValueIteration and BuildPolicy are called
-		if not a.any(self.mdp.values):
+		if not np.any(self.mdp.values):
 			self.mdp.ValueIteration()
-		if not a.any(self.mdp.policy):
+		if not np.any(self.mdp.policy):
 			self.mdp.BuildPolicy()
 		policy_mat = self.mdp.policy.transpose()
 		policy = [0 for i in self.s]
@@ -139,9 +140,10 @@ class GridWorldAgent(object):
 			curr_state = self.map.makeMove(curr_state, best_action)
 			num_steps += 1
 		if print_path:
+			print("path from " + str(start_coordinates))
 			for i in range(max_path_length):
-				print(str(coord_path_list[i]) + str(action_list[i]))
-		self.Display(showpolicy = True, path_list = coord_path_list)
+				print(str(coord_path_list[i]) + str(self.map.GetActionName(action_list[i])))
+			self.Display(showpolicy = True, path_list = coord_path_list)
 		return action_list, coord_path_list, state_path_list
 
 

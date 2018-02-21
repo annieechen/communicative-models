@@ -65,14 +65,15 @@ class MDP(object):
             if (self.values - V2).max() <= epsilon:
                 break
 
-    def Validate(self):
+    def Validate(self, display=False):
         """
         Check that MDP object is correct.
 
         Args:
             None
         """
-        print("Validating MDP...")
+        if display:
+        	print("Validating MDP...")
         dims = self.T.shape
         states = len(self.S)
         actions = len(self.A)

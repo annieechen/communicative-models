@@ -12,24 +12,27 @@ Actions = range(8)
 ActionNames = ["L", "R", "U", "D", "UL", "UR", "DL", "DR"]
 
 class RewardGuesser(object):
-	def __init__(self, transition_matrix, states):
+	def __init__(self, transition_matrix, states, reward_matrix):
 		self.S = states
 		self.T = transition_matrix
+		self.actual_reward = str(reward_matrix[0])
 
 	def guessReward(self, action_list, path_list):
-		rewardsToProbs = {}
+		matrix_to_probs = {}
 		# try every single state reward #
 		for i in range(len(self.S)):
 			# initialize a reward matrix to all 0s
-			reward_matrix = self.createRewards(i, 20)
+			reward_matrix = self.createRewards(i, 10)
 			prob = self.getProbActionsToRewards(reward_matrix, action_list, path_list)
-			rewardsToProbs[i] = prob
+			# hash the reward matrix for indexing, only need the 1st row because should be same for every action
+			matrix_to_probs[str(reward_matrix[0])] = prob
 
-		# get reward function with highest probability
-		max_prob = max(rewardsToProbs, key=rewardsToProbs.get)
-		max_keys = [x for x, v in rewardsToProbs.iteritems() if v == rewardsToProbs[max_prob]]
-		print("best prob states " + str(max_keys) + "=" + str(max_prob))
-		return rewardsToProbs
+		return matrix_to_probs
+
+	def getMostProbableRewards(self, matrix_to_probs):
+		# get reward matrices with max value
+		most_probable = [k for k,v in matrix_to_probs.iteritems() if v == max(matrix_to_probs.values())]
+		return most_probable
 
 	def createRewards(self, i, val):
 		rewards = np.full((len(Actions), len(self.S)), 0)
@@ -58,6 +61,13 @@ class RewardGuesser(object):
 			action, state = action_list[i], path_list[i]
 			prob *= probabilities[action,state]
 		return prob
+
+	def validate(self, action_list, path_list, display=False):
+		matrix_to_probs = self.guessReward(action_list, path_list)
+		guesses =  self.getMostProbableRewards(matrix_to_probs)
+		print("guesses = " + str(guesses))
+		print("actual = " + self.actual_reward)
+		return self.actual_reward in guesses
 
 if __name__ == "__main__":
 	a = GridWorldAgent(False, 3,3,rewardValues =  {(1,1):10})
