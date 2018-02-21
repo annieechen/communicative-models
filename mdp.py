@@ -51,6 +51,7 @@ class MDP(object):
         Returns:
             None
         """
+        self.Validate()
         self.values = np.zeros(self.values.shape)
         while True:
             V2 = self.values.copy()
@@ -73,7 +74,7 @@ class MDP(object):
             None
         """
         if display:
-        	print("Validating MDP...")
+            print("Validating MDP...")
         dims = self.T.shape
         states = len(self.S)
         actions = len(self.A)
@@ -90,8 +91,8 @@ class MDP(object):
             print("ERROR: Actions are not correctly numbered. MDP-004")
             return 0
         if self.R.shape != (actions, states):
-			print("ERROR: Reward matrix does not match")
-			return 0
+            print("ERROR: Reward matrix does not match")
+            return 0
         if (dims[1] != actions):
             print("ERROR: Transition matrix does not match number of actions. MDP-005")
             return 0

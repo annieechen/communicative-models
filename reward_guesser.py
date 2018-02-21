@@ -13,12 +13,14 @@ Actions = range(8)
 ActionNames = ["L", "R", "U", "D", "UL", "UR", "DL", "DR"]
 
 class RewardGuesser(object):
-	def __init__(self, transition_matrix, states, reward_matrix, action_list, path_list):
+	def __init__(self, transition_matrix, states, reward_matrix, action_list, path_list, h, w):
 		self.S = states
 		self.T = transition_matrix
 		self.actual_reward = str(reward_matrix[0])
 		self.action_list = action_list
 		self.path_list = path_list
+		self.h = h
+		self.w = w
 
 	def guessReward(self, num_samples):
 		sample_matrices = [None] * num_samples
@@ -40,22 +42,32 @@ class RewardGuesser(object):
 			for j in range(num_samples):
 				if sample_matrices[j][0][i] > 0:
 					r += sample_probabilites[j]
+					n_r += 1
 				elif sample_matrices[j][0][i] < 0:
 					p += sample_probabilites[j]
+					n_p += 1
 				else:
 					n  += sample_probabilites[j]
+					n_n += 1
+			r = r/ (n_r or 1)
+			p = p/ (n_p or 1)
+			n = n/ (n_n or 1)
+			# print(r,p,n)
+			# print(n_r, n_p, n_n)
 			# get biggest
-			if r == max(r,p,n):
-				final_list[i] = 10
-			elif p == max(r,p,n):
-				final_list[i] = -10
-			else:
+			if n == max(r,p,n):
 				final_list[i] = 0
+			elif r == max(r,p,n):
+				final_list[i] = 10
+			else:
+				final_list[i] = -10
 		final_matrix = self.createRewardMatrix(final_list)
 		# validate probabilites
 		max_from_samples = max(sample_probabilites)
 		final_probability = self.getProbActionsToRewards(final_matrix)
+		print(max_from_samples)
 		print(final_probability)
+	
 		return final_list
 
 		
@@ -122,29 +134,62 @@ class RewardGuesser(object):
 		print("actual = " + self.actual_reward)
 		return self.actual_reward in guesses
 
-	def validate(self, num_samples=10):
-		guess = str(self.guessReward(num_samples))
+	def validate(self, num_samples=10, display = False):
+		final_list = self.guessReward(num_samples)
+		guess = str(final_list)
 		print("guess = " + str(guess))
 		print("actual = " + self.actual_reward)
-		return self.actual_reward == guess
+		if self.actual_reward == guess:
+			return True
+		# if wrong, choose if want to graph the two values
+		if display:
+			final_matrix = self.createRewardMatrix(final_list)
+			wrong = MDP(self.S, Actions, self.T, final_matrix)
+			wrong.ValueIteration()
+			self.DisplayValues(wrong.values, self.h, self.w, final_matrix[0])
+		return False
+
+	def DisplayValues(self, values, h, w, rewardLocations):
+		data = values.reshape((h,w))
+		fig, ax = plt.subplots()
+		ax.matshow(data, cmap='Greens')
+		# add value #s
+		for (y, x), z in np.ndenumerate(data):
+			ax.annotate( '{:0.1f}'.format(z), xy=(x , y), xycoords='data')#, ha='right', va='top')
+		# highlight reward values
+		rewards = rewardLocations.reshape((h,w))
+		for (y, x), val in np.ndenumerate(rewards):
+			if val == 0:
+				continue
+			if val > 0:
+				color = 'green'
+			else:
+				color = 'red'
+			ax.annotate(str(val), xy=(x - 1, y - .7), color=color, backgroundcolor='black')
 
 
 	# generates a random number with 4 times as much likelyhood first # as second two
 	@staticmethod
 	def generateRandom(list_of_nums=[0, -10, 10]):
-		x = random.randint(1,10)
-		if x < 8:
+		x = random.randint(1,20)
+		if x < 17:
 			return list_of_nums[0]
-		if x == 9:
+		if x == 18:
 			return list_of_nums[1]
 		else:
 			return list_of_nums[2]
 
 
 if __name__ == "__main__":
-	a = GridWorldAgent(False, 3,3,rewardValues =  {(1,1):10, (3,3):-10})
+	# a = GridWorldAgent(False, 3,3,rewardValues =  {(1,1):10, (3,3):-10})
+	# a.Run()
+	# # don't need the coordinate path list 
+	# action_list,_, path_list = a.CreatePolicyPath((3,3),max_path_length = 4,  print_path=True)
+	# c = RewardGuesser(a.map.T, a.map.S, a.r, action_list, path_list)
+	# c.guessReward()
+
+	a = GridWorldAgent(width=4,height=4,rewardValues =  {(1,1):10, (2,2): -10, (3,4):-10})
 	a.Run()
-	# don't need the coordinate path list 
-	action_list,_, path_list = a.CreatePolicyPath((3,3),max_path_length = 4,  print_path=True)
-	c = RewardGuesser(a.map.T, a.map.S, a.r, action_list, path_list)
-	c.guessReward()
+	action_list,_, path_list = a.CreatePolicyPath((4,4),max_path_length =7,print_path=True)
+	c = RewardGuesser(a.map.T, a.map.S, a.r, action_list, path_list, 4,4)
+	c.validate(num_samples = 10, display=True)
