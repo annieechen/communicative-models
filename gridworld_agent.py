@@ -121,26 +121,6 @@ class GridWorldAgent(object):
 			ax.annotate('{:0.1f}'.format(val), xy=(x - 1, y - .7), color=color, backgroundcolor='black')
 		plt.show()
 
-	@staticmethod
-	def DisplayValues(values, h, w, rewardLocations):
-		data = values.reshape((h,w))
-		print(data)
-		fig, ax = plt.subplots()
-		ax.matshow(data, cmap='Greens')
-		# add value #s
-		for (y, x), z in np.ndenumerate(data):
-			ax.annotate( '{:0.1f}'.format(z), xy=(x , y), xycoords='data')#, ha='right', va='top')
-		# highlight reward values
-		rewards = rewardLocations.reshape((h,w))
-		for (y, x), val in np.ndenumerate(data):
-			if val == 0:
-				continue
-			if val > 0:
-				color = 'green'
-			else:
-				color = 'red'
-			ax.annotate('{:0.1f}'.format(val), xy=(x - 1, y - .7), color=color, backgroundcolor='black')
-
 	# start_coordinates = (x,y) tuple
 	def CreatePolicyPath(self, start_coordinates, max_path_length=10, print_path=False):
 		# if getMoves hasn't been called yet
