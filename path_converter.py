@@ -1,6 +1,7 @@
 import pygame
 import sys
 import csv
+import os
 from collections import OrderedDict
  
 # Define some colors
@@ -28,21 +29,27 @@ class PathConverter(object):
         if remove_duplicates:  
             scaled = self.remove_duplicates(scaled)
         self.write_data_to_file(scaled)
-            def read_data(self, file_name):
+
+    def read_data(self, file_name):
         with open(file_name) as csvfile:
             reader = csv.reader(csvfile)
-            data = list(reader)
+            data = list(reader)[1:]
         data = [(float(x),float(y)) for (x,y) in data]
         return data
 
 
     # just turns from strings to nums
-    def scale_data(self, data):
+    def scale_data(self, data, remove_extra=True):
         s = float(self.scale)
         final = [None] * len(data)
         for i in range(len(data)):
             x,y = data[i]
             final[i] = [round(x/s), round(y/s)]
+        if remove_extra:
+            min_x = min(final, key= lambda t: t[0])[0] - 1
+            min_y = min(final, key= lambda t: t[1])[1] - 1
+            final = [(int(x - min_x), int(y - min_y)) for (x,y) in final]
+
         return final
 
     def remove_duplicates(self, data):
@@ -54,6 +61,7 @@ class PathConverter(object):
             if prev == curr:
                 continue
             final.append(curr)
+        # anything that becomes up down and left right becomes diagonal
         return final
 
 
@@ -68,11 +76,14 @@ class PathConverter(object):
     def write_data_to_file(self, data, file_name=None):
         # default filename
         if not file_name:
-            file_name = "scaled" + self.file_name 
+            file_name = "scaled_" + self.file_name
         with open(file_name, 'w+') as f:
             writer = csv.writer(f)
             writer.writerows(data)
         print("finished writing to " + file_name)
+        max_x = str(max(data, key = lambda t: t[0])[0])
+        max_y = str(max(data, key = lambda t: t[1])[1])  
+        print("max (x,y) = " + max_x + "," + max_y)
 
     def visualize(self, data):
 
@@ -134,5 +145,6 @@ class PathConverter(object):
 
 
 if __name__ == "__main__":
-    c = PathConverter(file_name = "path.csv", width = 1000)
-    c.convert()
+    for file in os.listdir("data"):
+        c = PathConverter(file_name = os.path.join("data", file), width = 1000)
+        c.convert()
