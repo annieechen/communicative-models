@@ -133,7 +133,7 @@ class Map(object):
         self.mapheight = y
         self.diagonal = diagonal
         WorldSize = x * y
-        self.S = range(WorldSize)
+        self.S = range(WorldSize + 1)
         self.StateTypes = [0] * len(self.S)
         if diagonal:
             self.A = range(8)
@@ -144,14 +144,14 @@ class Map(object):
         if self.ObjectNames == []:
             self.ObjectNames = [
                 "Object " + str(i) for i in set(self.ObjectTypes)]
-        # From, With, To. Add one for the dead state
+        # From, With, To.  one for the dead state already added
         self.T = np.zeros((len(self.S), len(self.A), len(self.S)))
         # First create dead state structure. All actions leave agent in same
         # place.
-        # self.T[len(self.S), :, len(self.S)] = 1
+        self.T[len(self.S) - 1, :, len(self.S) -1] = 1
         # Make all states of the same type
         self.StateTypes = [0] * (len(self.S))
-        for i in range(len(self.S)):
+        for i in range(len(self.S) -1):
             # Moving left
             if (i % x == 0):
                 self.T[i, 0, i] = 1
@@ -250,7 +250,7 @@ class Map(object):
         Returns:
             Size (int)
         """
-        return len(self.S)
+        return len(self.S) - 1
 
     def NumberOfActions(self):
         """
@@ -315,6 +315,9 @@ class Map(object):
         if (State >= len(self.S)):
             print("ERROR: State out of bound. MAP-015")
             return None
+        # if deadstate
+        if State == len(self.S):
+            return (-1, -1)
         yval = int(math.floor(State * 1.0 / self.mapwidth)) + 1
         xval = State - self.mapwidth * (yval - 1) + 1
         return (xval, yval)
