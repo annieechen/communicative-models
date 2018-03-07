@@ -92,13 +92,14 @@ class GridWorldAgent(object):
 		if print_moves:
 			print("best move at each state")
 			policy_names = self.map.GetActionNames(policy)
-			print(policy_names.reshape((self.height, self.width)))
+			# pdb.set_trace()
+			print(policy_names[:-1].reshape((self.height, self.width)))
 		self.policy = policy
 		return policy
 
 
 	def Display(self, showpolicy=False, path_list=None):
-		data = self.mdp.values.reshape((self.height, self.width))
+		data = self.mdp.values[:,:-1].reshape((self.height, self.width))
 		fig, ax = plt.subplots()
 		ax.matshow(data, cmap='Greens')
 		if showpolicy:
