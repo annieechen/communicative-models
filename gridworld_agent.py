@@ -52,7 +52,10 @@ class GridWorldAgent(object):
 		# transform coordinates to states
 		stateRewards = {}
 		for coord, val in rewardValues.iteritems():
-			state = self.map.GetRawStateNumber(coord)
+			if type(coord) is int:
+				state = coord
+			else:
+				state = self.map.GetRawStateNumber(coord)
 			if display:
 				print("coord: " + str(coord) + " state: " + str(state) + " val: " + str(val))
 			stateRewards[state] = val
@@ -78,10 +81,11 @@ class GridWorldAgent(object):
 		
 		return rewards
 
-	def Run(self, display=False):
+	def Run(self, display=False, get_moves = True):
 		self.mdp.ValueIteration()
 		self.mdp.BuildPolicy()
-		self.getMoves()
+		if get_moves:
+			self.getMoves()
 		if display:
 			self.Display()
 		
@@ -121,7 +125,10 @@ class GridWorldAgent(object):
 				ax.annotate( '{:0.1f}'.format(z), xy=(x , y), xycoords='data')#, ha='right', va='top')
 		# highlight reward values
 		for state, val in self.rewardLocations.iteritems():
-			x,y = state
+			if type(state) is int:
+				x,y = self.map.GetCoordinates(state)
+			else:
+				x,y = state
 			if val > 0:
 				color = 'green'
 			else:
@@ -153,6 +160,45 @@ class GridWorldAgent(object):
 				print(str(coord_path_list[i]) + str(self.map.GetActionName(action_list[i])))
 			self.Display(showpolicy = True, path_list = coord_path_list)
 		return action_list, coord_path_list, state_path_list
+
+	def takeListGetPath(self, x_y_list):
+		state_list = []
+		action_list = []
+		curr_x, curr_y = x_y_list[0]
+		# ["L", "R", "U", "D"]
+		for x,y in x_y_list[1:]:
+			past_x, past_y = curr_x,curr_y
+			curr_x, curr_y = x,y
+			# if DR
+			if x > past_x and y > past_y:
+				action_list.append(7)
+			# DL
+			elif x < past_x and y > past_y:
+				action_list.append(6)
+			# UR
+			elif x > past_x and y < past_y:
+				action_list.append(5)
+			# UL
+			elif x < past_x and y < past_y:
+				action_list.append(4)
+			else:
+				# if down
+				if y > past_y:
+						action_list.append(3)
+				# up
+				if y < past_y:
+					action_list.append(2)
+				# R
+				if x > past_x:
+					action_list.append(1)
+				# L
+				if x < past_x:
+					action_list.append(0)
+			state_list.append(self.map.GetRawStateNumber((x,y)))
+			if len(action_list) != len(state_list):
+				print(x,y,past_x, past_y)
+		return action_list, state_list
+
 
 
 
