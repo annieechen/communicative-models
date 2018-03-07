@@ -68,6 +68,13 @@ class GridWorldAgent(object):
 			for state, val in stateRewards.iteritems():
 				for action in self.a:
 					rewards[action, state] = val
+
+		# alter transition matrix so that after they enter reward state, enter dead state
+		for state, val in stateRewards.iteritems():
+			# 0 everything out first
+			self.t[state, :, :] = 0
+			# now 100% chance will move to dead state
+			self.t[state,:, len(self.s) - 1] = 1
 		
 		return rewards
 

@@ -316,7 +316,7 @@ class Map(object):
             print("ERROR: State out of bound. MAP-015")
             return None
         # if deadstate
-        if State == len(self.S):
+        if State == len(self.S) - 1:
             return (-1, -1)
         yval = int(math.floor(State * 1.0 / self.mapwidth)) + 1
         xval = State - self.mapwidth * (yval - 1) + 1
