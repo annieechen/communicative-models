@@ -22,7 +22,91 @@ class RewardGuesser(object):
 		self.h = h
 		self.w = w
 
-	def guessReward(self, num_samples):
+	
+
+	# just assuming 1 reward
+	def simpleGuessReward(self, action_list, path_list):
+		final_probs = np.zeros(len(self.S))
+		# try every single state reward #
+		for i in range(len(self.S)):
+			prob = self.getProbActionsToRewards(i)
+			final_probs[i] = prob
+
+		return final_probs
+
+
+
+	def getProbActions(self, i):
+		# mdp = MDP(self.S, Actions, self.T, reward_matrix)
+		# # pdb.set_trace()
+		# mdp.ValueIteration()
+		# mdp.BuildPolicy()
+		reward_dict = {i:10}
+		a = GridWorldAgent(width=self.w,height=self.h,rewardValues = reward_dict)
+		a.Run(get_moves = False)
+		probabilities = a.mdp.policy
+		# print(probabilities)
+		return probabilities
+
+	# def getProbAction(self, probabilities, state, action):
+	# 	return pr[state,action]
+
+	def getProbActionsToRewards(self, i):
+		prob = 1.0
+		action_list = self.action_list
+		path_list = self.path_list
+		# build the polic)es for this reward matrix
+		probabilities = self.getProbActions( i)
+		for i in range(len(action_list)):
+			action, state = action_list[i], path_list[i]
+			prob *= probabilities[action,state]
+		return prob
+	def getMarginalProb(self):
+		final_probs = self.simpleGuessReward(self.action_list, self.path_list)
+		s = np.sum(final_probs)
+		print(s)
+		return s
+
+
+	def simpleValidate(self, display=False):
+		matrix_to_probs, final_probs = self.simpleGuessReward(self.action_list, self.path_list)
+		print(np.var(final_probs))
+		print(np.sum(final_probs))
+		guesses =  self.getMostProbableRewards(matrix_to_probs)
+		print("guesses = " + str(guesses))
+		print("actual = " + self.actual_reward)
+		return self.actual_reward in guesses
+
+
+	def DisplayValues(self, values, h, w, rewardLocations):
+		data = values.reshape((h,w))
+		fig, ax = plt.subplots()
+		ax.matshow(data, cmap='Greens')
+		# add value #s
+		for (y, x), z in np.ndenumerate(data):
+			ax.annotate( '{:0.1f}'.format(z), xy=(x , y), xycoords='data')#, ha='right', va='top')
+		# highlight reward values
+		rewards = rewardLocations.reshape((h,w))
+		for (y, x), val in np.ndenumerate(rewards):
+			if val == 0:
+				continue
+			if val > 0:
+				color = 'green'
+			else:
+				color = 'red'
+			ax.annotate(str(val), xy=(x, y - .3), color=color, backgroundcolor='black')
+
+
+
+	def getMostProbableRewards(self, matrix_to_probs):
+		# get reward matrices with max value
+		most_probable = [k for k,v in matrix_to_probs.iteritems() if v == max(matrix_to_probs.values())]
+		return most_probable
+
+	############################################
+ 	### fancier version with expected values ### 
+ 	############################################
+ 	def guessReward(self, num_samples):
 		sample_matrices = [None] * num_samples
 		sample_probabilites = [None] * num_samples
 		len_reward = len(self.S)
@@ -49,71 +133,6 @@ class RewardGuesser(object):
 		print(final_probability)
 
 		return final_list
-
-		
-
-	# just assuming 1 reward
-	def simpleGuessReward(self, action_list, path_list):
-		matrix_to_probs = {}
-		# try every single state reward #
-		for i in range(len(self.S)):
-			# initialize a reward matrix to all 0s
-			reward_matrix = self.simpleCreateRewards(i, 10)
-			prob = self.getProbActionsToRewards(reward_matrix)
-			# hash the reward matrix for indexing, only need the 1st row because should be same for every action
-			matrix_to_probs[str(reward_matrix[0])] = prob
-
-		return matrix_to_probs
-
-	def simpleCreateRewards(self, i, val):
-		rewards = np.full((len(Actions), len(self.S)), 0)
-		for action in Actions:
-				rewards[action, i] = val
-		return rewards
-
-	def createRewardMatrix(self, reward_list):
-		rewards = np.full((len(Actions), len(self.S)), 0)
-		for action in Actions:
-			for i in range(len(reward_list)):
-				rewards[action, i] = reward_list[i]
-		return rewards
-
-	def getMostProbableRewards(self, matrix_to_probs):
-		# get reward matrices with max value
-		most_probable = [k for k,v in matrix_to_probs.iteritems() if v == max(matrix_to_probs.values())]
-		return most_probable
-
-
-	def getProbActions(self, reward_matrix):
-		mdp = MDP(self.S, Actions, self.T, reward_matrix)
-		# pdb.set_trace()
-		mdp.ValueIteration()
-		mdp.BuildPolicy()
-		probabilities = mdp.policy
-		# print(probabilities)
-		return probabilities
-
-	# def getProbAction(self, probabilities, state, action):
-	# 	return pr[state,action]
-
-	def getProbActionsToRewards(self, reward_matrix):
-		prob = 1.0
-		action_list = self.action_list
-		path_list = self.path_list
-		# build the polic)es for this reward matrix
-		probabilities = self.getProbActions(reward_matrix)
-		for i in range(len(action_list)):
-			action, state = action_list[i], path_list[i]
-			prob *= probabilities[action,state]
-		return prob
-
-	def simpleValidate(self, display=False):
-		matrix_to_probs = self.simpleGuessReward(self.action_list, self.path_list)
-		guesses =  self.getMostProbableRewards(matrix_to_probs)
-		print("guesses = " + str(guesses))
-		print("actual = " + self.actual_reward)
-		return self.actual_reward in guesses
-
 	def validate(self, num_samples=10, display = False):
 		final_list = self.guessReward(num_samples)
 		guess = str(final_list)
@@ -129,24 +148,13 @@ class RewardGuesser(object):
 			self.DisplayValues(wrong.values, self.h, self.w, final_matrix[0])
 		return False
 
-	def DisplayValues(self, values, h, w, rewardLocations):
-		data = values.reshape((h,w))
-		fig, ax = plt.subplots()
-		ax.matshow(data, cmap='Greens')
-		# add value #s
-		for (y, x), z in np.ndenumerate(data):
-			ax.annotate( '{:0.1f}'.format(z), xy=(x , y), xycoords='data')#, ha='right', va='top')
-		# highlight reward values
-		rewards = rewardLocations.reshape((h,w))
-		for (y, x), val in np.ndenumerate(rewards):
-			if val == 0:
-				continue
-			if val > 0:
-				color = 'green'
-			else:
-				color = 'red'
-			ax.annotate(str(val), xy=(x, y - .3), color=color, backgroundcolor='black')
-
+		
+	def createRewardMatrix(self, reward_list):
+		rewards = np.full((len(Actions), len(self.S)), 0)
+		for action in Actions:
+			for i in range(len(reward_list)):
+				rewards[action, i] = reward_list[i]
+		return rewards
 
 	# generates a random number with 4 times as much likelyhood first # as second two
 	@staticmethod
