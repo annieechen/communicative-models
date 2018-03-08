@@ -85,8 +85,9 @@ class PathConverter(object):
         max_y = str(max(data, key = lambda t: t[1])[1])  
         print("max (x,y) = " + max_x + "," + max_y)
 
-    def visualize(self, data):
-
+    def visualize(self, data = None):
+        if not data:
+            data = self.raw_data
         rects = self.data_to_rects(data)
         pygame.init()
          
@@ -146,5 +147,5 @@ class PathConverter(object):
 
 if __name__ == "__main__":
     for file in os.listdir("data"):
-        c = PathConverter(file_name = os.path.join("data", file), width = 1000)
-        c.convert()
+        c = PathConverter(file_name = os.path.join("scaled_data", file), width = 40)
+        c.visualize()

@@ -36,12 +36,12 @@ class RewardGuesser(object):
 
 
 
-	def getProbActions(self, i):
+	def getProbActions(self, reward_location):
 		# mdp = MDP(self.S, Actions, self.T, reward_matrix)
 		# # pdb.set_trace()
 		# mdp.ValueIteration()
 		# mdp.BuildPolicy()
-		reward_dict = {i:10}
+		reward_dict = {reward_location:10}
 		a = GridWorldAgent(width=self.w,height=self.h,rewardValues = reward_dict)
 		a.Run(get_moves = False)
 		probabilities = a.mdp.policy
@@ -51,16 +51,23 @@ class RewardGuesser(object):
 	# def getProbAction(self, probabilities, state, action):
 	# 	return pr[state,action]
 
-	def getProbActionsToRewards(self, i):
+	def getProbActionsToRewards(self, reward_location):
 		prob = 1.0
 		action_list = self.action_list
 		path_list = self.path_list
-		# build the polic)es for this reward matrix
-		probabilities = self.getProbActions( i)
+		# build the policies for this reward matrix
+		probabilities = self.getProbActions(reward_location)
+		reward_seen = False
 		for i in range(len(action_list)):
 			action, state = action_list[i], path_list[i]
-			prob *= probabilities[action,state]
+			if state == reward_location:
+				reward_seen = True
+			if reward_seen:
+				prob *= 1.0/len(ActionNames)
+			else:
+				prob *= probabilities[action,state]
 		return prob
+
 	def getMarginalProb(self):
 		final_probs = self.simpleGuessReward(self.action_list, self.path_list)
 		s = np.sum(final_probs)
