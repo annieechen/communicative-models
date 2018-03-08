@@ -18,6 +18,7 @@ for filename in os.listdir("scaled_data"):
 	    action_list, path_list = b.takeListGetPath(data)
 	    c = RewardGuesser(b.map.T, b.map.S, b.r, action_list, path_list, 32,32)
 	    res = c.getMarginalProb()
+	    print(res)
 	    results[filename] = (res, len(action_list))
 
 with open("finalresultsa", 'w+') as f:
