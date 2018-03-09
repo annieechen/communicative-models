@@ -3,23 +3,40 @@ from reward_guesser import *
 import csv
 import os
 import json
+from multiprocessing import Pool
 
-b = GridWorldAgent(width=32,height=32,rewardValues =  {1:10})
 
 
-results = {}
-for filename in os.listdir("scaled_data"):
+
+fs = []
+
+
+
+
+def f(filename):
+	b = GridWorldAgent(width=32,height=32,rewardValues =  {1:10})
+    with open(os.path.join("scaled_data", filename)) as csvfile:
+	    reader = csv.reader(csvfile)
+	    data = list(reader)
+	print(filename)
+    data = [(int(x),int(y)) for (x,y) in data]
+    action_list, path_list = b.takeListGetPath(data)
+    c = RewardGuesser(b.map.T, b.map.S, b.r, action_list, path_list, 32,32)
+    res = c.getMarginalProb()
+    print(res)
+    return res
+
+
+
+
+
+
+
+if __name__ == '__main__':
+	for filename in os.listdir("scaled_data"):
 	if filename.startswith('e'):
-	    with open(os.path.join("scaled_data", filename)) as csvfile:
-	        reader = csv.reader(csvfile)
-	        data = list(reader)
-	    print(filename)
-	    data = [(int(x),int(y)) for (x,y) in data]
-	    action_list, path_list = b.takeListGetPath(data)
-	    c = RewardGuesser(b.map.T, b.map.S, b.r, action_list, path_list, 32,32)
-	    res = c.getMarginalProb()
-	    print(res)
-	    results[filename] = (res, len(action_list))
+		fs.append(filename)
+    pool = Pool(processes=4)              # start 4 worker processes
+    result = pool.map(f, fs)
+    print result
 
-with open("finalresultse", 'w+') as f:
-    f.write(json.dumps(results))
