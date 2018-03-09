@@ -88,7 +88,7 @@ class PathConverter(object):
     def visualize(self, data = None):
         if not data:
             data = self.raw_data
-        rects = self.data_to_rects(data)
+        rects = self.data_to_rects(data, scale=True)
         pygame.init()
          
         # Set the width and height of the screen [width, height]
@@ -132,7 +132,7 @@ class PathConverter(object):
             pygame.display.flip()
          
             # --- Limit to 60 frames per second
-            clock.tick(40)
+            clock.tick(5)
          
         # Close the window and quit.
         pygame.quit()
@@ -146,6 +146,9 @@ class PathConverter(object):
 
 
 if __name__ == "__main__":
-    for file in os.listdir("data"):
-        c = PathConverter(file_name = os.path.join("scaled_data", file), width = 40)
-        c.visualize()
+    c = PathConverter(file_name = "scaled_data/akil.csv", width = 320)
+    c.visualize()
+    # for file in os.listdir("data"):
+    #     print (file)
+    #     # c = PathConverter(file_name = os.path.join("scaled_data", file), width = 320)
+    #     c.visualize()
