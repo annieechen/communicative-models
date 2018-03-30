@@ -28,6 +28,7 @@ class PathConverter(object):
         scaled = self.scale_data(self.raw_data)
         if remove_duplicates:  
             scaled = self.remove_duplicates(scaled)
+            scaled = self.replace_with_diagonals(scaled)
         self.write_data_to_file(scaled)
 
     def read_data(self, file_name):
@@ -65,6 +66,30 @@ class PathConverter(object):
         return final
 
 
+    # anything that becomes up down and left right becomes diagonal
+    # must have called remove duplicates
+    def replace_with_diagonals(self, data):
+
+        final = []
+        # None, 2 for vert, 3 for horizontal
+        prev_dir = 0
+        curr_x, curr_y = data[0]
+        for x,y in data[1:]:
+            past_x, past_y = curr_x, curr_y
+            curr_x, curr_y = x,y
+            # pdb.set_trace()
+            if curr_x == past_x:
+                curr_dir = 2
+            elif curr_y == past_y:
+                curr_dir = 3
+            if curr_dir * prev_dir == 6:
+                del final[-1]
+                prev_dir = 0
+            else:
+                prev_dir = curr_dir
+            final.append((curr_x, curr_y))
+        return final
+
     def data_to_rects(self, data, scale = False):
         s = self.scale
         if scale:
@@ -76,7 +101,7 @@ class PathConverter(object):
     def write_data_to_file(self, data, file_name=None):
         # default filename
         if not file_name:
-            file_name = "scaled_" + self.file_name
+            file_name = "d_scaled_" + self.file_name
         with open(file_name, 'w+') as f:
             writer = csv.writer(f)
             writer.writerows(data)
