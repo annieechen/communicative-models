@@ -15,7 +15,7 @@ fs = []
 
 def f(filename):
     b = GridWorldAgent(width=32,height=32,rewardValues =  {1:10})
-    with open(os.path.join("scaled_data", filename)) as csvfile:
+    with open(os.path.join("d_scaled_data", filename)) as csvfile:
         reader = csv.reader(csvfile)
         data = list(reader)
     print(filename)
@@ -24,6 +24,7 @@ def f(filename):
     c = RewardGuesser(b.map.T, b.map.S, b.r, action_list, path_list, 32,32)
     res = c.getMarginalProb()
     print(res)
+    print(len(path_list))
     return res
 
 
@@ -33,10 +34,10 @@ def f(filename):
 
 
 if __name__ == '__main__':
-    for filename in os.listdir("scaled_data"):
-    if filename.startswith('e'):
-        fs.append(filename)
-    pool = Pool(processes=4)              # start 4 worker processes
+    for filename in os.listdir("d_scaled_data"):
+        if filename.startswith('i'):
+            fs.append(filename)
+    pool = Pool(processes=8)              # start 4 worker processes
     result = pool.map(f, fs)
     print result
 

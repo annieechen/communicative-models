@@ -1,0 +1,4 @@
+  File "tempe.py", line 28
+    return res
+         ^
+SyntaxError: invalid syntax

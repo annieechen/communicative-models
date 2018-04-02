@@ -1,0 +1,4 @@
+  File "tempe.py", line 18
+    with open(os.path.join("scaled_data", filename)) as csvfile:
+                                                               ^
+IndentationError: unindent does not match any outer indentation level
