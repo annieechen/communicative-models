@@ -26,7 +26,6 @@ def f(filename):
 
 
 if __name__ == '__main__':
-    letter = sys.argv[1]
     for filename in os.listdir("d_scaled_data"):
         # if filename.startswith(letter):
         fs.append(filename)
