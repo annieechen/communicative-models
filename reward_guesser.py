@@ -26,7 +26,7 @@ class RewardGuesser(object):
 
 	# just assuming 1 reward
 	def simpleGuessReward(self, action_list, path_list):
-		final_probs = np.zeros(len(self.S))
+		final_probs = {}
 		# try every single state reward #
 		for i in range(len(self.S)):
 			prob = self.getProbActionsToRewards(i)
@@ -52,27 +52,26 @@ class RewardGuesser(object):
 	# 	return pr[state,action]
 
 	def getProbActionsToRewards(self, reward_location):
-		prob = 1.0
 		action_list = self.action_list
 		path_list = self.path_list
 		# build the policies for this reward matrix
 		probabilities = self.getProbActions(reward_location)
 		reward_seen = False
+		prob_list = []
 		for i in range(len(action_list)):
 			action, state = action_list[i], path_list[i]
 			if state == reward_location:
 				reward_seen = True
 			if reward_seen:
-				prob *= 1.0/len(ActionNames)
+				prob_list.append(1.0/len(ActionNames))
 			else:
-				prob *= probabilities[action,state]
-		return prob
+				prob_list.append(probabilities[action,state])
+		return prob_list
 
 	def getMarginalProb(self):
-		final_probs = self.simpleGuessReward(self.action_list, self.path_list)
-		s = np.sum(final_probs)
-		print(s)
-		return s
+		final_probs_dict = self.simpleGuessReward(self.action_list, self.path_list)
+		print(final_probs_dict)
+		return final_probs_dict
 
 
 	def simpleValidate(self, display=False):
