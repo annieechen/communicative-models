@@ -2,11 +2,11 @@
 #SBATCH --partition=gpu
 #SBATCH --job-name=multimodel
 #SBATCH --ntasks=1 --nodes=1
-#SBATCH --cpus-per-task=10
+#SBATCH --cpus-per-task=25
 #SBATCH --mem-per-cpu=6000 
 #SBATCH --time=22:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=annie.chen@yale.edu
 
 module load Langs/Python/2.7-anaconda   
-python tempe.py > ioutput.txt
+python run_script.py > output.txt
