@@ -13,12 +13,12 @@ fs = []
 
 def to_csv(d, old_filename):
     new_filename = os.path.join("output_data", old_filename)
-    with open(new_filename) as csvfile:
+    with open(new_filename, 'w+') as csvfile:
         writer = csv.writer(csv_file, delimiter=',')
         for key in d:
             l = d[key]
             writer.writerow(l)
-            
+
 def f(filename):
     b = GridWorldAgent(width=32,height=32,rewardValues =  {1:10})
     with open(os.path.join("d_scaled_data", filename)) as csvfile:
