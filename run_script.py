@@ -4,14 +4,11 @@ import csv
 import os
 import json
 from multiprocessing import Pool
-
+import sys
 
 
 
 fs = []
-
-
-
 
 def f(filename):
     b = GridWorldAgent(width=32,height=32,rewardValues =  {1:10})
@@ -28,16 +25,12 @@ def f(filename):
     return res
 
 
-
-
-
-
-
 if __name__ == '__main__':
+    letter = sys.argv[1]
     for filename in os.listdir("d_scaled_data"):
-        if filename.startswith('i'):
-            fs.append(filename)
-    pool = Pool(processes=8)              # start 4 worker processes
+        # if filename.startswith(letter):
+        fs.append(filename)
+    pool = Pool(processes=25)              # start 4 worker processes
     result = pool.map(f, fs)
     print result
 
