@@ -13,8 +13,8 @@ fs = []
 
 def to_csv(d, old_filename):
     new_filename = os.path.join("output_data", old_filename)
-    with open(new_filename, 'w+') as csvfile:
-        writer = csv.writer(csv_file, delimiter=',')
+    with open(new_filename, 'w+') as f:
+        writer = csv.writer(f, delimiter=',')
         for key in d:
             l = d[key]
             writer.writerow(l)
