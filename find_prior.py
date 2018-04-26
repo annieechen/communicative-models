@@ -30,4 +30,8 @@ for i in range(100000):
 #         print(x)
         min_best_cor = x
 
-print(best_cors)
+
+for x in best_cors:
+	cor, prior = x
+	print(cor)
+	print(prior)
