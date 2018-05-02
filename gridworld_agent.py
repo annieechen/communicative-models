@@ -8,7 +8,7 @@ import pdb
 
 
 class GridWorldAgent(object):
-	def __init__(self, rewardWhenReached = False, width=10, height=10, diagonal=True, rewardValues = None):
+	def __init__(self, softmax, rewardWhenReached = False, width=10, height=10, diagonal=True, rewardValues = None):
 		"""
 		This class stores the values for the gridworld, and allows for creating paths/visualizing 
 
@@ -33,7 +33,7 @@ class GridWorldAgent(object):
 		self.rewardWhenReached = rewardWhenReached
 		self.rewardLocations = None
 		self.r = self._CreateRewards(rewardValues)
-		self.mdp = MDP(self.s,self.a,self.t,self.r)
+		self.mdp = MDP(self.s,self.a,self.t,self.r, tau =softmax)
 		# self.policy_moves = None
 		self.policy = None
 		# pdb.set_trace()
