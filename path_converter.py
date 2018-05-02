@@ -24,12 +24,13 @@ class PathConverter(object):
 
 
 
-    def convert(self, remove_duplicates=True):
+    def convert(self, remove_duplicates=True, write_data=True):
         scaled = self.scale_data(self.raw_data)
         if remove_duplicates:  
             scaled = self.remove_duplicates(scaled)
             scaled = self.replace_with_diagonals(scaled)
-        self.write_data_to_file(scaled)
+        if write_data:
+            self.write_data_to_file(scaled)
 
     def read_data(self, file_name):
         with open(file_name) as csvfile:
@@ -95,7 +96,7 @@ class PathConverter(object):
         if scale:
             rects = [[x*s, y*s, s,s] for (x,y) in data]
         else:
-            rects = [[x,y,1,1] for (x,y) in data]
+            rects = [[x,y,10,10] for (x,y) in data]
         return rects
 
     def write_data_to_file(self, data, file_name=None):
@@ -126,6 +127,7 @@ class PathConverter(object):
         # Used to manage how fast the screen updates
         clock = pygame.time.Clock()
         curr_square = None
+        screen.fill(BLACK)
         # -------- Main Program Loop -----------
         for row in rects:
             for event in pygame.event.get():
@@ -147,7 +149,7 @@ class PathConverter(object):
          
             # If you want a background image, replace this clear with blit'ing the
             # background image.
-            screen.fill(BLACK)
+            # screen.fill(BLACK)
          
             # --- Drawing code should go here
             if past_square:
@@ -160,7 +162,7 @@ class PathConverter(object):
             clock.tick(5)
          
         # Close the window and quit.
-        pygame.quit()
+        # pygame.quit()
 
 
 
@@ -171,9 +173,10 @@ class PathConverter(object):
 
 
 if __name__ == "__main__":
-    c = PathConverter(file_name = "scaled_data/akil.csv", width = 320)
-    c.visualize()
-    # for file in os.listdir("data"):
-    #     print (file)
-    #     # c = PathConverter(file_name = os.path.join("scaled_data", file), width = 320)
-    #     c.visualize()
+    # c = PathConverter(file_name = "data/inin.csv", width = 1000)
+    # # c.convert(write_data=False)
+    # c.visualize()
+    for file in os.listdir("standard_paths"):
+        print (file)
+        c = PathConverter(file_name = os.path.join("standard_paths", file), width = 400)
+        c.visualize()
