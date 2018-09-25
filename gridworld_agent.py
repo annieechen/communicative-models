@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors
+from math import log
+
+from itertools import permutations
 
 from mdp import MDP 
 from map import Map
@@ -138,6 +141,7 @@ class GridWorldAgent(object):
             ax.annotate('{:0.1f}'.format(val), xy=(x - 1, y - .7), color=color, backgroundcolor='black')
         plt.show()
 
+
     # start_coordinates = (x,y) tuple
     def CreatePolicyPath(self, start_coordinates, max_path_length=10, print_path=False):
         # if getMoves hasn't been called yet
@@ -201,6 +205,17 @@ class GridWorldAgent(object):
                 print(x,y,past_x, past_y)
         return action_list, state_list
 
+    def takeStateListGetCoordList(self, state_list, includeStartState=True):
+        coord_list = []
+        if includeStartState:
+            x, y = self.getMiddleOfMap()
+            coord_list.append([x-1,y-1])
+        for state in state_list:
+            x, y = self.map.GetCoordinates(state)
+            coord_list.append([x-1,y-1])
+        return coord_list
+
+
     def genRandomPath(self, length):
         action_list, state_list = [], []
         i = 0
@@ -234,38 +249,39 @@ class GridWorldAgent(object):
         return action_list, state_list
 
     # generates all paths of length n
+    # returns list of (action_list, state_list) tupics
     def genAllPaths(self, n):
-        action_list, state_list = [], []
-        i = 0
         action_map = ["L", "R", "U", "D", "UL", "UR", "DL", "DR"]
         action_lists = permutations(range(8), n)
+        results = []
+        for actions in action_lists:
+            action_list, state_list = [], []
+            i = 0
+            curr_x, curr_y = self.getMiddleOfMap()
+            for action_num in actions:
+                action = action_map[action_num]
+                past_x, past_y = curr_x, curr_y
+                if (('L' in action and past_x == 0) or 
+                    ('R' in action and past_x == self.width - 1) or
+                    ('U' in action and past_y == 0) or
+                    ('D' in action and past_y == self.height - 1)):
+                    print("SHOULD NOT HAPPEN")
+                    continue
 
+                if 'L' in action:
+                    curr_x -= 1
+                if 'R' in action:
+                    curr_x += 1
+                if 'U' in action:
+                    curr_y -= 1
+                if 'D' in action:
+                    curr_y += 1
+                state_list.append(self.map.GetRawStateNumber((curr_x, curr_y)))
+                action_list.append(action_num)
+                i += 1
+            results.append((action_list, state_list))
+        return results
 
-        curr_x, curr_y = self.getMiddleOfMap()
-        while i < length:
-            past_x, past_y = curr_x, curr_y
-            k = random.randint(0,7)
-            action = action_map[k]
-            if 'L' in action and past_x == 0:
-                continue
-            if 'R' in action and past_x == self.width - 1:
-                continue
-            if 'U' in action and past_y == 0:
-                continue
-            if 'D' in action and past_y == self.height - 1:
-                continue
-
-            if 'L' in action:
-                curr_x -= 1
-            if 'R' in action:
-                curr_x += 1
-            if 'U' in action:
-                curr_y -= 1
-            if 'D' in action:
-                curr_y += 1
-            state_list.append(self.map.GetRawStateNumber((curr_x, curr_y)))
-            action_list.append(k)
-            i += 1
 
     def getMiddleOfMap(self):
         return self.width//2, self.height//2
@@ -280,6 +296,46 @@ class GridWorldAgent(object):
             action, state = action_list[i], path_list[i]
             product_probabilities *= (probabilities[action,state])
         return product_probabilities
+
+    def displayAllPaths(self, lengthofPath):
+        results = self.genAllPaths(lengthofPath)
+
+        coordAndLikelihood = []
+        for path in results:
+            action_list, state_list = path
+            likelihood = self.getLikelihoodOfPath(action_list, state_list)
+            coord_list = self.takeStateListGetCoordList(state_list)
+            coordAndLikelihood.append((np.array(coord_list), likelihood))
+
+
+        # sort list so paths with highest likelihood are last
+        coordAndLikelihood.sort(key = lambda x:x[1])
+
+        data = np.zeros((self.height, self.width))
+        # highlight reward values
+        for state, val in self.rewardLocations.iteritems():
+            if type(state) is int:
+                x,y = self.map.GetCoordinates(state)
+            else:
+                x,y = state
+            data[y-1][x-1] = val
+        # highlight start
+        start_x, start_y = coordAndLikelihood[0][0][0]
+        # print((start_x, start_y))
+        data[start_y][start_x] = -10
+
+        fig, ax = plt.subplots()
+        ax.matshow(data, cmap='Greens')
+        logged_likelihoods = [-1 * log(i[1]) for i in coordAndLikelihood]
+        logged_color_list = [float(i)/max(logged_likelihoods) for i in logged_likelihoods]
+        normal_color_list = [float(i[1])/(max(coordAndLikelihood, key=lambda x:x[1])[1]) for i in coordAndLikelihood]
+        colors = plt.get_cmap('viridis')
+        # each path
+        for idx, item in enumerate(coordAndLikelihood):
+            path, _ = item
+            plt.plot(path[:, 0], path[:, 1], color=colors(logged_color_list[idx]), linewidth=7.0)
+            plt.plot(path[:, 0], path[:, 1], color=colors(normal_color_list[idx]), linewidth=1.0)
+        plt.show()
 
 if __name__ == "__main__":
     a =  GridWorldAgent(width=3,height=4, rewardValues = {(2,4):10, (3,1): -20})
