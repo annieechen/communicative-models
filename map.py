@@ -299,6 +299,7 @@ class Map(object):
             print("ERROR: x-coordinate out of bounds (Numbering starts at 1). MAP-013")
             return None
         if (yval <= 0) or (yval > self.mapheight):
+            print(yval)
             print("EROOR: y-coordinate out of bounds (Numbering starts at 1). MAP-014")
         return (yval - 1) * self.mapwidth + xval - 1
 

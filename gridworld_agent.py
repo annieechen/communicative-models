@@ -297,7 +297,7 @@ class GridWorldAgent(object):
             product_probabilities *= (probabilities[action,state])
         return product_probabilities
 
-    def displayAllPaths(self, lengthofPath):
+    def displayAllPaths(self, lengthofPath, topthree=False):
         results = self.genAllPaths(lengthofPath)
 
         coordAndLikelihood = []
@@ -326,11 +326,15 @@ class GridWorldAgent(object):
 
         fig, ax = plt.subplots()
         ax.matshow(data, cmap='Greens')
+
+        # each path
+        if topthree:
+        	coordAndLikelihood = coordAndLikelihood[0:1] + coordAndLikelihood[-1:]
+        	print(coordAndLikelihood)
         logged_likelihoods = [-1 * log(i[1]) for i in coordAndLikelihood]
         logged_color_list = [float(i)/max(logged_likelihoods) for i in logged_likelihoods]
         normal_color_list = [float(i[1])/(max(coordAndLikelihood, key=lambda x:x[1])[1]) for i in coordAndLikelihood]
         colors = plt.get_cmap('viridis')
-        # each path
         for idx, item in enumerate(coordAndLikelihood):
             path, _ = item
             plt.plot(path[:, 0], path[:, 1], color=colors(logged_color_list[idx]), linewidth=7.0)
