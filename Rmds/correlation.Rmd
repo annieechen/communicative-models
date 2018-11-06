@@ -1,0 +1,187 @@
+---
+title: "Correlation"
+author: "Annie"
+date: "3/8/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+```{r}
+d <- data.frame(x[c(1,8)])
+l <- LETTERS
+l<- l[1:16]
+for (c in l){
+    d[c] <-grepl(tolower(c),x$filename)
+}
+
+d$straight <- d$A + d$B + d$C + d$D
+d$diag <- d$E + d$F + d$G + d$H
+d$curve <- d$I + d$J + d$K + d$L + d$M + d$N + d$O + d$P
+dir = l
+d$model <- w$model
+d$log <- w$b_data_output.log
+m <- lm(people ~ straight + diag + curve + log, data = d)
+summary(m)
+
+plot(d$log, predict(m, data=d), type = 'n')
+text(d$log, predict(m, data=d), labels = x$filename, cex=.9)
+```
+
+```{r}
+x <- read.csv("results.csv")
+
+
+plot(w$people, log(z))
+plot(x$people, log(x$a_data_output.marginal_probability))
+plot(x$people, -log(x$a_data_output.marginal_probability),type = "n")
+text(x$people, -log(x$a_data_output.marginal_probability), labels=x$filename, cex=.9)
+
+plot(x$people, x$d_scaled_output.avg)
+plot(x$people, x$a_output.avg)
+plot(x$people, x$b_data_output.avg)
+plot(x$people, x$orig_path,type = "n")
+text(x$people,  x$orig_path, labels = x$filename, cex=.9)
+```
+```{r}
+w <- read.csv("results2.csv")
+w$GgivenA <- w$b_data_output.marginal_probability/(w$b_data_output.marginal_probability + 1)
+w$CgivenA <- 1- w$GgivenA
+w$model <- ifelse(w$CgivenA > w$GgivenA, w$CgivenA / w$GgivenA, -w$GgivenA / w$CgivenA)
+plot(w$people, w$model, type='n')
+text(x$people,  w$model,labels = w$filename, cex=.5)
+
+x<- read.csv("results.csv")
+
+z <- w[w$filename%in%x$filename,] 
+
+
+plot(z$a_data_output.marginal_probability, z$b_data_output.marginal_probability)
+plot(x$people, z$b_data_output.marginal_probability, type='n')
+text(x$people,  z$b_data_output.marginal_probability, labels = w$filename, cex=.5)
+# w$GgivenA <-
+#     w$b_data_output.marginal_probability/(w$b_data_output.marginal_probability + 1)
+# #(w$b_data_output.marginal_probability/2048)/ ((w$b_data_output.marginal_probability/2048) + (1/(8^25)))
+#     #
+# 
+# 
+# 
+# w$CgivenA <- 1- w$GgivenA
+# w$model <- ifelse(w$CgivenA > w$GgivenA, w$CgivenA / w$GgivenA, -w$GgivenA / w$CgivenA)
+# plot(w$people,(w$model))
+```
+
+
+
+```{r}
+y <- read.csv("results2.csv")
+x$filename <- toString(x$filename)
+y$filename <- toString(y$filename)
+y <- y[y$filename%in%x$filename,] 
+plot(x$people, y$d_scaled_outputsquared_avg)
+plot(x$people, sqrt(y$d_scaled_outputsquared_avg/1000))
+plot(x$people, y$a_data_outputsquared_avg)
+plot(x$people, y$b_data_output.avg)
+```
+
+
+```{r}
+plot(x$people, log(x$d_scaled_output.marginal_probability))
+
+w <- x[x$a_data_output.marginal_probability <1.150000e-07,]
+z <-scale(w$a_data_output.marginal_probability, center = TRUE, scale = TRUE)
+
+plot(w$people, log(z))
+plot(x$people, log(x$a_data_output.marginal_probability))
+plot(x$people, log(x$b_data_output.marginal_probability))
+
+cor(x$people, log(x$d_scaled_output.marginal_probability))
+cor(x$people, log(x$a_data_output.marginal_probability))
+```
+
+
+```{r}
+plot(x$people,log(x$d_scaled_output.marginal_probability **2))
+plot(x$people, log(x$a_data_output.marginal_probability**2))
+plot(x$people, (x$a_data_output.marginal_probability**2))
+plot(x$people, log(x$b_data_output.marginal_probability**2))
+
+w <- scale(x$b_data_output.marginal_probability)
+z <- sum(x$b_data_output.marginal_probability)
+plot(x$people, log((x$b_data_output.marginal_probability/sum(x$b_data_output.marginal_probability))**2), type='n')
+text(x$people, log((x$b_data_output.marginal_probability/sum(x$b_data_output.marginal_probability))**2),labels = x$filename, cex=.9)
+```
+```{r}
+plot(x$people, log((x$a_data_output.marginal_probability/sum(x$a_data_output.marginal_probability))**2), type='n')
+text(x$people, log((x$a_data_output.marginal_probability/sum(x$a_data_output.marginal_probability))**2),labels = x$filename, cex=.9)
+cor(x$people, log((x$a_data_output.marginal_probability/sum(x$a_data_output.marginal_probability))**2))
+```
+
+```{r}
+plot(x$people, log((x$d_scaled_output.marginal_probability/sum(x$d_scaled_output.marginal_probability))**2), type='n')
+text(x$people, log((x$d_scaled_output.marginal_probability/sum(x$d_scaled_output.marginal_probability))**2),labels = x$filename, cex=.9)
+```
+
+
+x <- na.omit(x)
+
+
+m <- lm(log(x$d.result) ~ x$d.pathlength, data=x[c(-1, -9),])
+plot(x$Average, log(x$d.result))
+plot(x$Average, log(x$d.result/.95**(x$d.pathlength)))#, cex=(x$d.pathlength - 28))
+plot(x$Average, (x$d.result/.95**(x$d.pathlength)))
+plot(x$d.pathlength, log(x$d.result))
+abline(m)
+plot(x$Average, x$d.average)
+cor(x$Average, x$d.average)
+
+```
+```{r}
+plot(x$Average, log(x$d.result))
+plot(x$Average, log(x$d.result/.95**(x$d.pathlength)))#, cex=(x$d.pathlength - 28))
+plot(x$Average, (x$d.result/.95**(x$d.pathlength)))
+
+m <- mean(x$d.result/x$d.pathlength)
+plot(x$d.pathlength, log(x$d.result/(.125)^(x$d.pathlength)))
+```
+
+
+
+```{r}
+x[, c("PathId","Average", "model.result", "path.length")]
+cor(x$d.pathlength, x$d.result)
+cor(x$Average, log(x$d.result))
+```
+```{r}
+y <- x[c(-1, -9),]
+plot(y$d.pathlength, log(y$d.result))
+z <- lm(log(y$d.result) ~ y$d.pathlength, data=y)
+plot(y$d.pathlength, log(y$d.result))
+abline(z)
+plot(y$d.pathlength, log(y$d.result)/y$d.pathlength, cex=0)
+text(y$d.pathlength, log(y$d.result)/y$d.pathlength, labels = y$PathId, cex=.9)
+```
+
+```{r}
+plot(x$average, log(x$d.result))
+```
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r}
+d <- data.frame(x$filename, x$people)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

@@ -1,0 +1,89 @@
+---
+title: "Final Results"
+author: "Annie"
+date: "5/2/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+
+
+## R Markdown
+
+```{r}
+data = read.csv('final_results.csv')
+```
+
+
+First, some general plots
+
+```{r}
+plot(data$model, data$people, log="x", type = 'n')
+text(data$model, data$people,labels=data$filename)
+
+plot(data$a_o6.log, data$model,type = 'n')
+text(data$a_o6.log, data$model,labels=data$filename)
+cor(data$a_o6.log, data$model, use="na.or.complete")
+```
+Run a linear regression 
+
+```{r}
+data$logmodel = log10(data$model)
+m <- lm(people~logmodel, data=data)
+summary(m)
+plot(data$logmodel, data$people, type='n')
+text(data$logmodel, data$people, labels=data$filename)
+abline(m)
+
+cor(data$model, data$people, method="spearman")
+
+ggplot(data, aes(y=people, x=model))  + geom_text(aes(label=filename),hjust=0, vjust=0)
+
+ggplot(data, aes(y=people, x=logmodel)) + geom_smooth(method='lm') + geom_text(aes(label=filename),hjust=0, vjust=0)
+ggplot(data, aes(y=people, x=-preds)) + geom_smooth(method='lm') + geom_text(aes(label=filename),hjust=0, vjust=0)
+```
+```{r}
+all_m <-lm (people~ log(model) + Eff, data=data)
+summary(all_m)
+preds <- predict(all_m, data=data)
+data$preds <- preds
+ggplot(data, aes(y=people, x=-preds)) + geom_smooth(method='lm') + geom_text(aes(label=filename),hjust=0, vjust=0)
+cor(preds, data$people)
+```
+
+
+```{r}
+
+```
+
+
+
+
+Calculating Priors
+```{r}
+S <- 41 * 41
+priors <- (data$people * (data$model* (-1 * 1e16)))/(S * (1- data$people))
+data$priors <- priors
+cor(data$model, data$people)
+cor(log(data$model), data$people)
+cor((data$priors)/(data$priors + data$model), data$people)
+cor((S* priors)/((S*priors) +(data$model* 1e16)), data$people)
+plot((S* priors)/((S*priors) +(data$model* 1e16)), data$people)
+
+ggplot(data, aes(y=people, x=log(-1*priors))) + geom_smooth(method='lm') + geom_text(aes(label=filename),hjust=0, vjust=0)
+
+d <- data[data$Eff > 0,]
+cor(d$priors, d$Eff, method="spearman")
+cocor(data$priors, data$Eff, method="spearman")
+cor(data$model, data$Eff, method="spearman")
+plot(log(data$priors), data$Eff, type='n')
+text(log(data$priors), data$Eff, labels=data$filename, cex=0.9)
+```
+

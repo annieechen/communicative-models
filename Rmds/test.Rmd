@@ -1,0 +1,112 @@
+---
+title: "Test"
+author: "Annie"
+date: "4/16/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+
+
+```{r}
+data <- read.csv("results4.csv")
+m <- data[data$filename%in%x,]
+y <- people
+c <- (m* (1-y)) / (y)
+l <- lm(y ~ m + c, data=d)
+d <- data.frame(y)
+d$y <- y
+d$c <- c
+d$m <- m
+summary(l)
+
+e <- log(data$d_scaled_o.log)/data$d_scaled_o.log
+
+
+plot(.0000001/(.0000001+ data$d_scaled_o.log), x$people,type = 'n')
+text(.0000001/(.0000001+ data$d_scaled_o.log), x$people, labels=paste(x$orig_path, x$filename))
+
+
+plot(log(data$d_scaled_o.log), x$people,type = 'n')
+text(log(data$d_scaled_o.log), x$people, labels=paste(x$orig_path, x$filename))
+
+
+plot(log(data$d_scaled_o28.log), x$people,type = 'n')
+text(log(data$d_scaled_o28.log), x$people, labels=paste(x$orig_path, x$filename))
+x$people
+
+
+plot(log(data$d_scaled_o6.log), x$people,type = 'n')
+text(log(data$d_scaled_o6.log), x$people, labels=paste(x$orig_path, x$filename))
+x$people
+
+
+
+plot(log(data$d_scaled_output.log), x$people,type = 'n')
+text(log(data$d_scaled_output.log),  x$people, labels=paste(x$orig_path, x$filename))
+
+
+cor((data$d_scaled_o.log), x$people, method="spearman")
+cor(log(data$d_scaled_o28.log), x$people, method="spearman")
+cor(log(data$d_scaled_o6.log), x$people, method="spearman")
+
+cor(log(data$d_scaled_o.log), x$people)
+cor(log(data$d_scaled_o28.log), x$people)
+cor(log(data$d_scaled_o6.log), x$people)
+
+
+pred <- predict(l, data=d)
+plot(d$y, pred, log="y", type = 'n')
+text(d$y, pred, log="y",labels = x$filename, cex=.9)
+
+
+plot(d$y, d$m, log="y", type = 'n')
+text(d$y, d$m, labels = x$filename, cex=.9)
+```
+
+```{r}
+x <- read.csv("correlation.csv")$PathId
+people <- read.csv("correlation.csv")$Average
+#old <- read.csv("results2.csv")
+new <- read.csv("results3.csv")
+
+new <- new[new$filename%in%x,] 
+#new <- new[new$b_data_output.log < 1E+30,]
+plot(x$people, log((new$b_data_output.log )))
+w <- new
+
+w$GgivenA <- w$b_data_output.marginal_probability/(w$b_data_output.marginal_probability + 1)
+w$CgivenA <- 1- w$GgivenA
+w$model <- ifelse(w$CgivenA > w$GgivenA, w$CgivenA / w$GgivenA, -w$GgivenA / w$CgivenA)
+plot(people, w$model, type='n')
+text(people,  w$model,labels = w$filename, cex=.5)
+
+plot(people, log(w$b_data_output.log), type='n')
+text(people, log(w$b_data_output.log),labels = w$filename, cex=.5)
+
+plot(people, w$_data_output.avg)
+
+
+
+plot(people, log(w$b_data_output.log), type='n')
+text(people, log(w$b_data_output.log),labels = w$filename, cex=.5)
+plot(people, log(w$a_data_output.log), type='n')
+text(people, log(w$a_data_output.log),labels = w$filename, cex=.5)
+plot(log(80 + log(w$d_scaled_output.log)),people,  type='n')
+text(log(80 + log(w$d_scaled_output.log)),people,labels = w$filename, cex=.5)
+
+plot(people, (w$d_scaled_output.log), type='n')
+text(people, (w$d_scaled_output.log),labels = w$filename, cex=.5)
+
+new$b_data_output.marginal_probability - new$b_data_output.log
+```
