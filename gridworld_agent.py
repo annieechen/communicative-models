@@ -302,7 +302,7 @@ class GridWorldAgent(object):
         return product_probabilities
 
 
-    def getLikelihoodAllPaths(self, lengthofPath):
+    def getLikelihoodAllPaths(self, lengthofPath, display=False, topthree=False):
     	results = self.genAllPaths(lengthofPath)
 
         coordAndLikelihood = []
@@ -311,12 +311,13 @@ class GridWorldAgent(object):
             likelihood = self.getLikelihoodOfPath(action_list, state_list)
             coord_list = self.takeStateListGetCoordList(state_list)
             coordAndLikelihood.append((np.array(coord_list), likelihood))
+        if display:
+        	self.displayAllPaths(coordAndLikelihood, topthree=topthree)
         return coordAndLikelihood
 
         # sort list so paths with highest likelihood are last
         coordAndLikelihood.sort(key = lambda x:x[1])
-    def displayAllPaths(self, lengthofPath, topthree=False):
-        coordAndLikelihood = self.getLikelihoodAllPaths(lengthofPath)
+    def displayAllPaths(self, coordAndLikelihood, topthree=False):
         # sort list so paths with highest likelihood are last
         coordAndLikelihood.sort(key = lambda x:x[1])
 
