@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 from math import log
 
-from itertools import permutations
+from itertools import product
 
 from mdp import MDP 
 from map import Map
@@ -252,7 +252,7 @@ class GridWorldAgent(object):
     # returns list of (action_list, state_list) tupics
     def genAllPaths(self, n):
         action_map = ["L", "R", "U", "D", "UL", "UR", "DL", "DR"]
-        action_lists = permutations(range(8), n)
+        action_lists = product(range(8), repeat=n)
         results = []
         for actions in action_lists:
             action_list, state_list = [], []
@@ -295,10 +295,15 @@ class GridWorldAgent(object):
         for i in range(len(action_list)):
             action, state = action_list[i], path_list[i]
             product_probabilities *= (probabilities[action,state])
+            # print(state)
+            if state in self.rewardLocations and len(self.rewardLocations) == 1:
+            	print("found reward, stopped counting")
+            	break
         return product_probabilities
 
-    def displayAllPaths(self, lengthofPath, topthree=False):
-        results = self.genAllPaths(lengthofPath)
+
+    def getLikelihoodAllPaths(self, lengthofPath):
+    	results = self.genAllPaths(lengthofPath)
 
         coordAndLikelihood = []
         for path in results:
@@ -306,8 +311,12 @@ class GridWorldAgent(object):
             likelihood = self.getLikelihoodOfPath(action_list, state_list)
             coord_list = self.takeStateListGetCoordList(state_list)
             coordAndLikelihood.append((np.array(coord_list), likelihood))
+        return coordAndLikelihood
 
-
+        # sort list so paths with highest likelihood are last
+        coordAndLikelihood.sort(key = lambda x:x[1])
+    def displayAllPaths(self, lengthofPath, topthree=False):
+        coordAndLikelihood = self.getLikelihoodAllPaths(lengthofPath)
         # sort list so paths with highest likelihood are last
         coordAndLikelihood.sort(key = lambda x:x[1])
 
@@ -329,7 +338,7 @@ class GridWorldAgent(object):
 
         # each path
         if topthree:
-        	coordAndLikelihood = coordAndLikelihood[0:1] + coordAndLikelihood[-1:]
+        	coordAndLikelihood = coordAndLikelihood[0:3] + coordAndLikelihood[-3:]
         	print(coordAndLikelihood)
         logged_likelihoods = [-1 * log(i[1]) for i in coordAndLikelihood]
         logged_color_list = [float(i)/max(logged_likelihoods) for i in logged_likelihoods]
