@@ -20,7 +20,7 @@ def to_csv(d, old_filename):
             writer.writerow(l)
 
 def f(filename):
-    b = GridWorldAgent(width=32,height=32,rewardValues =  {1:10})
+    b = GridWorldAgent(width=40,height=40,rewardValues =  {1:10}, softmax=0.2)
     with open(os.path.join("d_scaled_data", filename)) as csvfile:
         reader = csv.reader(csvfile)
         data = list(reader)
@@ -36,7 +36,7 @@ def f(filename):
 
 
 if __name__ == '__main__':
-    for filename in os.listdir("d_scaled_data"):
+    for filename in os.listdir("no_diag_40"):
         # if filename.startswith(letter):
         fs.append(filename)
     pool = Pool(processes=25)              # start 4 worker processes
