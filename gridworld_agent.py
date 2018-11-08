@@ -11,7 +11,7 @@ import pdb
 import random
 
 class GridWorldAgent(object):
-    def __init__(self, softmax=0.01, rewardWhenReached = False, width=10, height=10, diagonal=True, rewardValues = None):
+    def __init__(self, softmax=0.01, rewardWhenReached = False, width=10, height=10, diagonal=False, rewardValues = None):
         """
         This class stores the values for the gridworld, and allows for creating paths/visualizing 
 
@@ -52,7 +52,9 @@ class GridWorldAgent(object):
         if not rewardValues:
             rewardValues = {(1,1):10, (self.width,self.height): -10}
         self.rewardLocations = rewardValues
-        rewards = np.full((len(self.a), len(self.s)), 0)
+        rewards = np.full((len(self.a), len(self.s)), -1)
+        # for i in [4,5,6,7]:
+        #     rewards[i,:] = -1.4142
         # transform coordinates to states
         stateRewards = {}
         for coord, val in rewardValues.iteritems():
@@ -69,12 +71,12 @@ class GridWorldAgent(object):
                 for action in self.a: 
                     next_state = self.map.makeMove(curr_state, action)
                     if next_state in stateRewards:
-                        rewards[action, curr_state] = stateRewards[next_state]
+                        rewards[action, curr_state] += stateRewards[next_state]
         # any action they take in reward state = reward
         else:
             for state, val in stateRewards.iteritems():
                 for action in self.a:
-                    rewards[action, state] = val
+                    rewards[action, state] += val
 
         # alter transition matrix so that after they enter reward state, enter dead state
         for state, val in stateRewards.iteritems():
@@ -251,8 +253,8 @@ class GridWorldAgent(object):
     # generates all paths of length n
     # returns list of (action_list, state_list) tupics
     def genAllPaths(self, n):
-        action_map = ["L", "R", "U", "D", "UL", "UR", "DL", "DR"]
-        action_lists = product(range(8), repeat=n)
+        action_map = ["L", "R", "U", "D"]#, "UL", "UR", "DL", "DR"]
+        action_lists = product(range(4), repeat=n)
         results = []
         for actions in action_lists:
             action_list, state_list = [], []
@@ -261,12 +263,6 @@ class GridWorldAgent(object):
             for action_num in actions:
                 action = action_map[action_num]
                 past_x, past_y = curr_x, curr_y
-                if (('L' in action and past_x == 0) or 
-                    ('R' in action and past_x == self.width - 1) or
-                    ('U' in action and past_y == 0) or
-                    ('D' in action and past_y == self.height - 1)):
-                    print("SHOULD NOT HAPPEN")
-                    continue
 
                 if 'L' in action:
                     curr_x -= 1
@@ -276,9 +272,15 @@ class GridWorldAgent(object):
                     curr_y -= 1
                 if 'D' in action:
                     curr_y += 1
+
+                if curr_x <= 0 or curr_x > self.width or curr_y <= 0 or curr_y >self.height:
+                    # print("SHOULD NOT HAPPEN")
+                    break
                 state_list.append(self.map.GetRawStateNumber((curr_x, curr_y)))
                 action_list.append(action_num)
                 i += 1
+            # only append full paths that didn't hit an edge
+            # if len(action_list) == len(actions):
             results.append((action_list, state_list))
         return results
 
@@ -297,7 +299,7 @@ class GridWorldAgent(object):
             product_probabilities *= (probabilities[action,state])
             # print(state)
             if state in self.rewardLocations and len(self.rewardLocations) == 1:
-            	print("found reward, stopped counting")
+            	# print("found reward, stopped counting")
             	break
         return product_probabilities
 
@@ -339,8 +341,8 @@ class GridWorldAgent(object):
 
         # each path
         if topthree:
-        	coordAndLikelihood = coordAndLikelihood[0:3] + coordAndLikelihood[-3:]
-        	print(coordAndLikelihood)
+        	coordAndLikelihood = coordAndLikelihood[0:3] #+ coordAndLikelihood[-5:]
+        	# print(coordAndLikelihood)
         logged_likelihoods = [-1 * log(i[1]) for i in coordAndLikelihood]
         logged_color_list = [float(i)/max(logged_likelihoods) for i in logged_likelihoods]
         normal_color_list = [float(i[1])/(max(coordAndLikelihood, key=lambda x:x[1])[1]) for i in coordAndLikelihood]
