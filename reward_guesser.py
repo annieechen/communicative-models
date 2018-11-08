@@ -10,7 +10,7 @@ import random
 
 
 Actions = range(8)
-ActionNames = ["L", "R", "U", "D", "UL", "UR", "DL", "DR"]
+ActionNames = ["L", "R", "U", "D"]# "UL", "UR", "DL", "DR"]
 
 class RewardGuesser(object):
 	def __init__(self, transition_matrix, states, reward_matrix, action_list, path_list, h, w):
