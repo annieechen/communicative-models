@@ -15,17 +15,18 @@ ActionNames = ["L", "R", "U", "D"]# "UL", "UR", "DL", "DR"]
 
 class RewardGuesser(object):
 	# Dirname = the directory where the npy files are stored
-	def __init__(self, dirname, action_list, path_list):
+	def __init__(self, dirname, action_list, path_list,size_world):
 		self.dirname = dirname
 		self.action_list = action_list
 		self.path_list = path_list
+		self.size_world = size_world
 	
 
 	# just assuming 1 reward
 	def simpleGuessReward(self, action_list, path_list):
 		final_probs = {}
 		# try every single state reward #
-		for i in range(len(self.S)):
+		for i in range(self.size_world):
 			prob = self.getProbActionsToRewards(i)
 			final_probs[i] = prob
 
@@ -34,7 +35,7 @@ class RewardGuesser(object):
 
 
 	def getProbActions(self, reward_location):
-		probabilities = np.load(os.path.join(dirname, "%04d" % (reward_location)))
+		probabilities = np.load(os.path.join(self.dirname, "%04d.npy" % (reward_location)))
 		# print(probabilities)
 		return probabilities
 
