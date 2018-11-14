@@ -295,13 +295,13 @@ class Map(object):
         # Transform coordinates to raw state numbers.
         xval = Coordinates[0]
         yval = Coordinates[1]
-        if (xval <= 0) or (xval > self.mapwidth):
-            print("ERROR: x-coordinate out of bounds (Numbering starts at 1). MAP-013")
+        if (xval < 0) or (xval >= self.mapwidth):
+            print("ERROR: x-coordinate out of bounds (Numbering starts at 0). MAP-013")
             return None
-        if (yval <= 0) or (yval > self.mapheight):
+        if (yval < 0) or (yval >= self.mapheight):
             print(yval)
-            print("EROOR: y-coordinate out of bounds (Numbering starts at 1). MAP-014")
-        return (yval - 1) * self.mapwidth + xval - 1
+            print("EROOR: y-coordinate out of bounds (Numbering starts at 0). MAP-014")
+        return (yval) * self.mapwidth + xval
 
     def GetCoordinates(self, State):
         """
