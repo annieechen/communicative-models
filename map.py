@@ -320,7 +320,7 @@ class Map(object):
         # if deadstate
         if State == len(self.S) - 1:
             return (-1, -1)
-        yval = int(math.floor(State * 1.0 / self.mapwidth)) - 1
+        yval = int(math.floor(State * 1.0 / self.mapwidth))
         xval = State - (self.mapwidth * yval)
         return (xval, yval)
 
