@@ -12,7 +12,7 @@ fs = []
 
 
 def to_csv(d, old_filename):
-    new_filename = os.path.join("output_data", old_filename)
+    new_filename = os.path.join("no_diag_40", old_filename)
     with open(new_filename, 'w+') as f:
         writer = csv.writer(f, delimiter=',')
         for key in d:
@@ -20,7 +20,7 @@ def to_csv(d, old_filename):
             writer.writerow(l)
 
 def f(filename):
-    b = GridWorldAgent(width=40,height=40,rewardValues =  {1:10}, softmax=0.2)
+    b = GridWorldAgent(width=32,height=32,rewardValues =  {1:10}, softmax=0.2)
     with open(os.path.join("d_scaled_data", filename)) as csvfile:
         reader = csv.reader(csvfile)
         data = list(reader)
