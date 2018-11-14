@@ -101,5 +101,6 @@ ENV/
 .mypy_cache/
 
 *.csv
+!/no_diag_40/*
 
 data/
