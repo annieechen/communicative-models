@@ -3,7 +3,7 @@ import sys
 import csv
 import os
 from collections import OrderedDict
- 
+
 # Define some colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -24,11 +24,13 @@ class PathConverter(object):
 
 
 
-    def convert(self, remove_duplicates=True, write_data=True):
+    def convert(self, remove_duplicates=True, write_data=True, diagonals=False):
         scaled = self.scale_data(self.raw_data)
-        if remove_duplicates:  
+        if remove_duplicates:
             scaled = self.remove_duplicates(scaled)
-            scaled = self.replace_with_diagonals(scaled)
+            # scaled = self.replace_with_diagonals(scaled)
+        if not diagonals:
+            scaled = self.remove_diagonals(scaled)
         if write_data:
             self.write_data_to_file(scaled)
 
@@ -63,7 +65,23 @@ class PathConverter(object):
             if prev == curr:
                 continue
             final.append(curr)
-        # anything that becomes up down and left right becomes diagonal
+        return final
+
+    def remove_diagonals(self, data):
+    	final = []
+    	prev_dir = 0
+        curr_x, curr_y = data[0]
+        for x,y in data[1:]:
+            past_x, past_y = curr_x, curr_y
+            curr_x, curr_y = x,y
+            # if this is a diagonal
+            if curr_x != past_x and curr_y != past_y:
+            	# do vertical first, then horizontal
+            	print("removed diagonal")
+            	final.append((past_x, curr_y))
+            	final.append((curr_x, curr_y))
+            else:
+            	final.append((curr_x, curr_y))
         return final
 
 
@@ -99,11 +117,13 @@ class PathConverter(object):
             rects = [[x,y,10,10] for (x,y) in data]
         return rects
 
-    def write_data_to_file(self, data, file_name=None):
+    def write_data_to_file(self, data, file_prefix=None):
         # default filename
-        if not file_name:
-            file_name = "d_scaled_" + self.file_name
-        with open(file_name, 'w+') as f:
+        if file_prefix:
+            file_name =  file_prefix + self.file_name
+        else:
+            file_name = self.file_name
+        with open(os.path.join("no_diag_30", os.path.basename(file_name)), 'w+') as f:
             writer = csv.writer(f)
             writer.writerows(data)
         print("finished writing to " + file_name)
@@ -176,7 +196,7 @@ if __name__ == "__main__":
     # c = PathConverter(file_name = "data/inin.csv", width = 1000)
     # # c.convert(write_data=False)
     # c.visualize()
-    for file in os.listdir("standard_paths"):
+    for file in os.listdir("data"):
         print (file)
-        c = PathConverter(file_name = os.path.join("standard_paths", file), width = 400)
-        c.visualize()
+        c = PathConverter(file_name = os.path.join("data", file), width =30)
+        c.convert(write_data=False)
