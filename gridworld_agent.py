@@ -53,8 +53,6 @@ class GridWorldAgent(object):
             rewardValues = {(1,1):10, (self.width,self.height): -10}
         self.rewardLocations = rewardValues
         rewards = np.full((len(self.a), len(self.s)), -1)
-        # for i in [4,5,6,7]:
-        #     rewards[i,:] = -1.4142
         # transform coordinates to states
         stateRewards = {}
         for coord, val in rewardValues.iteritems():
@@ -332,7 +330,8 @@ class GridWorldAgent(object):
                 x,y = state
             data[y-1][x-1] = val
         # highlight start
-        start_x, start_y = coordAndLikelihood[0][0][0]
+        start_x, start_y = self.getMiddleOfMap()
+        #coordAndLikelihood[0][0][0]
         # print((start_x, start_y))
         data[start_y][start_x] = -10
 
