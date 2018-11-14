@@ -342,7 +342,7 @@ class GridWorldAgent(object):
 
         # each path
         if topthree:
-        	coordAndLikelihood = coordAndLikelihood[0:3] #+ coordAndLikelihood[-5:]
+        	coordAndLikelihood = coordAndLikelihood[0:3] + coordAndLikelihood[-3:]
         	# print(coordAndLikelihood)
         logged_likelihoods = [-1 * log(i[1]) for i in coordAndLikelihood]
         logged_color_list = [float(i)/max(logged_likelihoods) for i in logged_likelihoods]
