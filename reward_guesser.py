@@ -19,6 +19,7 @@ class RewardGuesser(object):
 		self.dirname = dirname
 		self.action_list = action_list
 		self.path_list = path_list
+		# this should be width * height 
 		self.size_world = size_world
 	
 
@@ -58,6 +59,16 @@ class RewardGuesser(object):
 			else:
 				prob_list.append(probabilities[action,state])
 		return prob_list
+
+	def genAverageLikelihood(self):
+		action_list = self.action_list
+		final_probs = np.zeros(self.size_world)
+		for i in range(self.size_world):
+			prob_array = self.getProbActionsToRewards(i)
+			final_probs[i] = np.prod(np.array(prob_array))  
+		sum_of_probs_over_world = np.sum(final_probs)
+		return sum_of_probs_over_world
+
 
 	def getMarginalProb(self):
 		final_probs_dict = self.simpleGuessReward(self.action_list, self.path_list)

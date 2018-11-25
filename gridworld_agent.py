@@ -228,6 +228,7 @@ class GridWorldAgent(object):
         # bc if there no diagonals in the list then they won't map in
         action_map = ["L", "R", "U", "D", "UL", "UR", "DL", "DR"]
         curr_x, curr_y = start_x, start_y
+        next_x, next_y = curr_x, curr_y
         for action_num in action_list:
             action = action_map[action_num]
             if 'L' in action:
@@ -247,7 +248,22 @@ class GridWorldAgent(object):
         return state_list
 
 
-   
+    def genManyStateListsFromAction(self, action_list, n):
+        i = 0
+        num_tries = 0
+        list_of_state_lists = []
+        while i < n:
+            num_tries += 1
+            startState = random.randint(0, self.width * self.height)
+            start_x, start_y = self.map.GetCoordinates(startState)
+            state_list = self.takeActionListGetStateList(action_list, start_x, start_y)
+            if not state_list:
+                continue
+            list_of_state_lists.append(state_list)
+            i += 1
+        print("Total tries: %s, rate:%s" % (num_tries, n/float(num_tries)))
+        return list_of_state_lists
+
 
     # generates all paths of length n
     # returns list of (action_list, state_list) tupics
