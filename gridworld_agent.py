@@ -11,7 +11,7 @@ import pdb
 import random
 
 class GridWorldAgent(object):
-    def __init__(self, softmax=0.01, rewardWhenReached = False, width=10, height=10, diagonal=False, rewardValues = None):
+    def __init__(self, softmax=0.01, rewardWhenReached=False, width=10,height=None, diagonal=False, rewardValues=None,):
         """
         This class stores the values for the gridworld, and allows for creating paths/visualizing 
 
@@ -30,8 +30,11 @@ class GridWorldAgent(object):
         self.map = Map(diagonal=True)
         # fill states, transition, actions
         self.width = width
-        self.height = height
-        self.s, self.t, self.a = self.map.BuildGridWorld(width, height, diagonal)
+        if height == None:
+            self.height = width
+        else:
+            self.height = height
+        self.s, self.t, self.a = self.map.BuildGridWorld(self.width, self.height, diagonal)
 
         self.rewardWhenReached = rewardWhenReached
         self.rewardLocations = None
@@ -53,8 +56,6 @@ class GridWorldAgent(object):
             rewardValues = {(1,1):10, (self.width,self.height): -10}
         self.rewardLocations = rewardValues
         rewards = np.full((len(self.a), len(self.s)), -1)
-        # for i in [4,5,6,7]:
-        #     rewards[i,:] = -1.4142
         # transform coordinates to states
         stateRewards = {}
         for coord, val in rewardValues.iteritems():
@@ -120,16 +121,18 @@ class GridWorldAgent(object):
         data = self.mdp.values[:,:-1].reshape((self.height, self.width))
         fig, ax = plt.subplots()
         ax.matshow(data, cmap='Greens')
+        """
+        this wasn't tested after I changed the index for the coordinates, may not work
         if showpolicy:
             for (y, x), z in np.ndenumerate(data):
                 if (x + 1, y + 1,) in path_list:
                     ax.annotate( '{:0.1f}'.format(z), xy=(x , y), xycoords='data', backgroundcolor='purple')
                 else:
                     ax.annotate( '{:0.1f}'.format(z), xy=(x , y), xycoords='data')
+        """
         # don't change colors
-        else:
-            for (y, x), z in np.ndenumerate(data):
-                ax.annotate( '{:0.1f}'.format(z), xy=(x , y), xycoords='data')#, ha='right', va='top')
+        for (y, x), z in np.ndenumerate(data):
+            ax.annotate( '{:0.1f}'.format(z), xy=(x , y), xycoords='data')#, ha='right', va='top')
         # highlight reward values
         for state, val in self.rewardLocations.iteritems():
             if type(state) is int:
@@ -211,10 +214,10 @@ class GridWorldAgent(object):
         coord_list = []
         if includeStartState:
             x, y = self.getMiddleOfMap()
-            coord_list.append([x-1,y-1])
+            coord_list.append([x,y])
         for state in state_list:
             x, y = self.map.GetCoordinates(state)
-            coord_list.append([x-1,y-1])
+            coord_list.append([x,y])
         return coord_list
 
 
@@ -273,7 +276,7 @@ class GridWorldAgent(object):
                 if 'D' in action:
                     curr_y += 1
 
-                if curr_x <= 0 or curr_x > self.width or curr_y <= 0 or curr_y >self.height:
+                if curr_x < 0 or curr_x >= self.width or curr_y < 0 or curr_y >= self.height:
                     # print("SHOULD NOT HAPPEN")
                     break
                 state_list.append(self.map.GetRawStateNumber((curr_x, curr_y)))
@@ -316,9 +319,6 @@ class GridWorldAgent(object):
         if display:
         	self.displayAllPaths(coordAndLikelihood, topthree=topthree)
         return coordAndLikelihood
-
-        # sort list so paths with highest likelihood are last
-        coordAndLikelihood.sort(key = lambda x:x[1])
     def displayAllPaths(self, coordAndLikelihood, topthree=False):
         # sort list so paths with highest likelihood are last
         coordAndLikelihood.sort(key = lambda x:x[1])
@@ -330,9 +330,10 @@ class GridWorldAgent(object):
                 x,y = self.map.GetCoordinates(state)
             else:
                 x,y = state
-            data[y-1][x-1] = val
+            data[y][x] = val
         # highlight start
-        start_x, start_y = coordAndLikelihood[0][0][0]
+        start_x, start_y = self.getMiddleOfMap()
+        #coordAndLikelihood[0][0][0]
         # print((start_x, start_y))
         data[start_y][start_x] = -10
 
@@ -341,7 +342,7 @@ class GridWorldAgent(object):
 
         # each path
         if topthree:
-        	coordAndLikelihood = coordAndLikelihood[0:3] #+ coordAndLikelihood[-5:]
+        	coordAndLikelihood = coordAndLikelihood[0:3] + coordAndLikelihood[-3:]
         	# print(coordAndLikelihood)
         logged_likelihoods = [-1 * log(i[1]) for i in coordAndLikelihood]
         logged_color_list = [float(i)/max(logged_likelihoods) for i in logged_likelihoods]

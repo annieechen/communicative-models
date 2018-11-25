@@ -7,28 +7,26 @@ from map import Map
 from gridworld_agent import *
 import pdb
 import random
+import os
 
 
 Actions = range(8)
 ActionNames = ["L", "R", "U", "D"]# "UL", "UR", "DL", "DR"]
 
 class RewardGuesser(object):
-	def __init__(self, transition_matrix, states, reward_matrix, action_list, path_list, h, w):
-		self.S = states
-		self.T = transition_matrix
-		self.actual_reward = str(reward_matrix[0])
+	# Dirname = the directory where the npy files are stored
+	def __init__(self, dirname, action_list, path_list,size_world):
+		self.dirname = dirname
 		self.action_list = action_list
 		self.path_list = path_list
-		self.h = h
-		self.w = w
-
+		self.size_world = size_world
 	
 
 	# just assuming 1 reward
 	def simpleGuessReward(self, action_list, path_list):
 		final_probs = {}
 		# try every single state reward #
-		for i in range(len(self.S)):
+		for i in range(self.size_world):
 			prob = self.getProbActionsToRewards(i)
 			final_probs[i] = prob
 
@@ -37,14 +35,7 @@ class RewardGuesser(object):
 
 
 	def getProbActions(self, reward_location):
-		# mdp = MDP(self.S, Actions, self.T, reward_matrix)
-		# # pdb.set_trace()
-		# mdp.ValueIteration()
-		# mdp.BuildPolicy()
-		reward_dict = {reward_location:10}
-		a = GridWorldAgent(width=self.w,height=self.h,rewardValues = reward_dict)
-		a.Run(get_moves = False)
-		probabilities = a.mdp.policy
+		probabilities = np.load(os.path.join(self.dirname, "%04d.npy" % (reward_location)))
 		# print(probabilities)
 		return probabilities
 

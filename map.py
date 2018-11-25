@@ -288,6 +288,7 @@ class Map(object):
 
         Args:
             Coordinates (list): with the x and y coordinate.
+            starts at 0, limit (width - 1, height - 1)
 
         Returns
             State (int)
@@ -295,13 +296,13 @@ class Map(object):
         # Transform coordinates to raw state numbers.
         xval = Coordinates[0]
         yval = Coordinates[1]
-        if (xval <= 0) or (xval > self.mapwidth):
-            print("ERROR: x-coordinate out of bounds (Numbering starts at 1). MAP-013")
+        if (xval < 0) or (xval >= self.mapwidth):
+            print("ERROR: x-coordinate out of bounds (Numbering starts at 0). MAP-013")
             return None
-        if (yval <= 0) or (yval > self.mapheight):
+        if (yval < 0) or (yval >= self.mapheight):
             print(yval)
-            print("EROOR: y-coordinate out of bounds (Numbering starts at 1). MAP-014")
-        return (yval - 1) * self.mapwidth + xval - 1
+            print("EROOR: y-coordinate out of bounds (Numbering starts at 0). MAP-014")
+        return (yval) * self.mapwidth + xval
 
     def GetCoordinates(self, State):
         """
@@ -319,8 +320,8 @@ class Map(object):
         # if deadstate
         if State == len(self.S) - 1:
             return (-1, -1)
-        yval = int(math.floor(State * 1.0 / self.mapwidth)) + 1
-        xval = State - self.mapwidth * (yval - 1) + 1
+        yval = int(math.floor(State * 1.0 / self.mapwidth))
+        xval = State - (self.mapwidth * yval)
         return (xval, yval)
 
     def InsertObjects(self, Locations, ObjectTypes, Organic, ObjectNames=None, SurvivalProb=1):
