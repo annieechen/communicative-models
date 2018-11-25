@@ -22,8 +22,6 @@ class PathConverter(object):
         self.raw_data = self.read_data(file_name)
         # data is always a list of [(x,y)] coordinates
 
-
-
     def convert(self, remove_duplicates=True, write_data=True, diagonals=False):
         scaled = self.scale_data(self.raw_data)
         if remove_duplicates:
@@ -85,8 +83,49 @@ class PathConverter(object):
         return final
 
 
-    # anything that becomes up down and left right becomes diagonal
+    def convert_coordstates_to_actions(self, coordlist, include_diagonals=False):
+        action_list = []
+        curr_x, curr_y = coordlist[0]
+        # ["L", "R", "U", "D"]
+        for x,y in coordlist[1:]:
+            past_x, past_y = curr_x,curr_y
+            curr_x, curr_y = x,y
+            if include_diagonals:
+                #if DR
+                if x > past_x and y > past_y:
+                    action_list.append(7)
+                    continue
+                # DL
+                elif x < past_x and y > past_y:
+                    action_list.append(6)
+                    continue
+                # UR
+                elif x > past_x and y < past_y:
+                    action_list.append(5)
+                    continue
+                # UL
+                elif x < past_x and y < past_y:
+                    action_list.append(4)
+                    continue
+            # L
+            if x < past_x:
+                action_list.append(0)
+            # R
+            if x > past_x:
+                action_list.append(1)
+            # up
+            if y < past_y:
+                action_list.append(2)
+            # down
+            if y > past_y:
+                action_list.append(3)
+        return action_list
+
+    """
+    Currently deprecated, because I'm not testing the version with diagnoals
+    nything that becomes up down and left right becomes diagonal
     # must have called remove duplicates
+    """
     def replace_with_diagonals(self, data):
 
         final = []
