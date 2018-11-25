@@ -98,6 +98,7 @@ class GridWorldAgent(object):
         self.hasRun = True
         
 
+    # get list of best moves at each state
     def getMoves(self, print_moves = True):
         # check to make sure ValueIteration and BuildPolicy are called
         if not np.any(self.mdp.values):
@@ -172,6 +173,7 @@ class GridWorldAgent(object):
             self.Display(showpolicy = True, path_list = coord_path_list)
         return action_list, coord_path_list, state_path_list
 
+    # should also be deprecated, I think I shouldnt need the raw state number to to do this
     def takeListGetPath(self, x_y_list):
         state_list = []
         action_list = []
@@ -181,30 +183,30 @@ class GridWorldAgent(object):
             past_x, past_y = curr_x,curr_y
             curr_x, curr_y = x,y
             # if DR
-            if x > past_x and y > past_y:
-                action_list.append(7)
-            # DL
-            elif x < past_x and y > past_y:
-                action_list.append(6)
-            # UR
-            elif x > past_x and y < past_y:
-                action_list.append(5)
-            # UL
-            elif x < past_x and y < past_y:
-                action_list.append(4)
-            else:
-                # if down
-                if y > past_y:
-                        action_list.append(3)
-                # up
-                if y < past_y:
-                    action_list.append(2)
-                # R
-                if x > past_x:
-                    action_list.append(1)
-                # L
-                if x < past_x:
-                    action_list.append(0)
+            # if x > past_x and y > past_y:
+            #     action_list.append(7)
+            # # DL
+            # elif x < past_x and y > past_y:
+            #     action_list.append(6)
+            # # UR
+            # elif x > past_x and y < past_y:
+            #     action_list.append(5)
+            # # UL
+            # elif x < past_x and y < past_y:
+            #     action_list.append(4)
+            # else:
+            # if down
+            if y > past_y:
+                action_list.append(3)
+            # up
+            if y < past_y:
+                action_list.append(2)
+            # R
+            if x > past_x:
+                action_list.append(1)
+            # L
+            if x < past_x:
+                action_list.append(0)
             state_list.append(self.map.GetRawStateNumber((x,y)))
             if len(action_list) != len(state_list):
                 print(x,y,past_x, past_y)

@@ -26,6 +26,7 @@ class PathConverter(object):
         if not self.include_diagonals:
             scaled = self.remove_diagonals(scaled)
         action_list = self.convert_coordstates_to_actions(scaled)
+        print(action_list)
         if write_data:
             self.write_data_to_file(action_list)
 
@@ -87,7 +88,7 @@ class PathConverter(object):
         for x,y in coordlist[1:]:
             past_x, past_y = curr_x,curr_y
             curr_x, curr_y = x,y
-            if self.nclude_diagonals:
+            if self.include_diagonals:
                 #if DR
                 if x > past_x and y > past_y:
                     action_list.append(7)
@@ -153,19 +154,16 @@ class PathConverter(object):
             rects = [[x,y,10,10] for (x,y) in data]
         return rects
 
-    def write_data_to_file(self, data, file_prefix=None):
+    def write_data_to_file(self, data):
         # default filename
-        if file_prefix:
-            file_name =  file_prefix + self.file_name
-        else:
-            file_name = self.file_name
-        with open(os.path.join(outputdirectory, os.path.basename(file_name)), 'w+') as f:
+        file_name = os.path.basename(self.file_name)
+        with open(os.path.join(outputdirectory, file_name), 'w+') as f:
             writer = csv.writer(f)
-            writer.writerows(data)
+            writer.writerow(data)
         print("finished writing to " + file_name)
-        max_x = str(max(data, key = lambda t: t[0])[0])
-        max_y = str(max(data, key = lambda t: t[1])[1])  
-        print("max (x,y) = " + max_x + "," + max_y)
+        # max_x = str(max(data, key = lambda t: t[0])[0])
+        # max_y = str(max(data, key = lambda t: t[1])[1])
+        # print("max (x,y) = " + max_x + "," + max_y)
 
     def visualize(self, data = None):
         if not data:
@@ -217,10 +215,13 @@ if __name__ == "__main__":
         print("usage: path_converter [datainputdirectory] [actionlistresultsdirectory] [scalefactor] [-d if diagnoals")
         exit(1)
     datainputdirectory = sys.argv[1]
-    scalefactor = sys.argv[2]
     # this one is a global so write_data_to_file can use it
     global outputdirectory
-    outputdirectory = sys.argv[3]
+    outputdirectory = sys.argv[2]
+    if not os.path.exists(outputdirectory):
+        os.makedirs(outputdirectory)
+    scalefactor = sys.argv[3]
+
     if len(sys.argv) == 5 and sys.argv[4] == "-d":
         include_diagonals = True
     else:
