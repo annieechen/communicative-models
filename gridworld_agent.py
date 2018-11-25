@@ -222,38 +222,32 @@ class GridWorldAgent(object):
             coord_list.append([x,y])
         return coord_list
 
-
-    def genRandomPath(self, length):
-        action_list, state_list = [], []
-        i = 0
+    def takeActionListGetStateList(self, action_list, start_x, start_y):
+        state_list = []
+        # this should be fine without extra check for diagonals, 
+        # bc if there no diagonals in the list then they won't map in
         action_map = ["L", "R", "U", "D", "UL", "UR", "DL", "DR"]
-        curr_x, curr_y = self.getMiddleOfMap()
-        while i < length:
-            past_x, past_y = curr_x, curr_y
-            k = random.randint(0,7)
-            action = action_map[k]
-            if 'L' in action and past_x == 0:
-                continue
-            if 'R' in action and past_x == self.width - 1:
-                continue
-            if 'U' in action and past_y == 0:
-                continue
-            if 'D' in action and past_y == self.height - 1:
-                continue
-
+        curr_x, curr_y = start_x, start_y
+        for action_num in action_list:
+            action = action_map[action_num]
             if 'L' in action:
-                curr_x -= 1
+                next_x = curr_x - 1
             if 'R' in action:
-                curr_x += 1
+                next_x = curr_x + 1
             if 'U' in action:
-                curr_y -= 1
+                next_y = curr_y - 1
             if 'D' in action:
-                curr_y += 1
+                next_y = curr_y + 1
+            # now check if out of bounds
+            if next_x < 0 or next_x == self.width or next_y < 0 or next_y == self.height:
+                return
+            # else, this move works, add curr_x curr_y
             state_list.append(self.map.GetRawStateNumber((curr_x, curr_y)))
-            action_list.append(k)
-            i += 1
+            curr_x, curr_y = next_x, next_y
+        return state_list
 
-        return action_list, state_list
+
+   
 
     # generates all paths of length n
     # returns list of (action_list, state_list) tupics
