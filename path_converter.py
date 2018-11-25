@@ -159,33 +159,17 @@ class PathConverter(object):
             if curr_square == past_square:
                 continue
             print(curr_square)
-            
-            # --- Game logic should go here
-         
-            # --- Screen-clearing code goes here
-         
-            # Here, we clear the screen to white. Don't put other drawing commands
-            # above this, or they will be erased with this command.
-         
-            # If you want a background image, replace this clear with blit'ing the
-            # background image.
-            # screen.fill(BLACK)
-         
-            # --- Drawing code should go here
+
             if past_square:
                 pygame.draw.rect(screen, RED, past_square)
             pygame.draw.rect(screen, GREEN, curr_square)
             # --- Go ahead and update the screen with what we've drawn.
             pygame.display.flip()
-         
             # --- Limit to 60 frames per second
             clock.tick(5)
          
         # Close the window and quit.
         # pygame.quit()
-
-
-
 
     def get_both(self, data):
         return self.data_to_rects(self.convert_data(data), scale=True)
