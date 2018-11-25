@@ -102,5 +102,6 @@ ENV/
 
 *.csv
 !/no_diag_40/*
+!/action_lists_10/*
 
 data/
