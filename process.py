@@ -16,6 +16,18 @@ def get_data(d, filename):
         data[i] = [ float(j) for j in data[i]]
     return data
 
+# for things coming out of analyze_policies,
+# so first line is start state, second is probability
+def get_data_with_state_start(d, filename):
+    with open(os.path.join(d, filename)) as f:
+        reader = csv.reader(f)
+        data = list(reader)
+    for i in range(len(data)):
+        # get only second element
+        data[i] = float(data[i][1])
+    return data
+
+
 def get_average(data):
     total = 0.0
     for row in data:
@@ -60,13 +72,13 @@ if __name__ == '__main__':
     results = defaultdict(list)
     result_header = ['filename']
     for d in resultsdir:
-        result_header += [d + ".marginal_probability", d+".avg", d+".log"]
+        result_header += [d + ".marginal_probability"]#, d+".avg", d+".log"]
         for filename in sorted(os.listdir(d)):
             f = filename.split('.')[0]
-            data = get_data(d, filename)
+            data = get_data_with_state_start(d, filename)
             # print(np.shape(data))
-            avg = get_average(data)
-            results[f] += [get_product(data), get_average(data), get_log_product(data)]
+            # avg = get_average(data)
+            results[f] += [np.sum(np.array(data))]
 
     with open(outputfile, 'w+') as f:
         writer = csv.writer(f)
