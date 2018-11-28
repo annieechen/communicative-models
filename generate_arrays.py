@@ -10,10 +10,10 @@ import sys
 # reward location from 0 to n
 def gen_and_save_policy(reward_location):
 	filename = os.path.join(dir_name, "%04d" % (reward_location))
-		if not os.path.isfile(filename + ".npy"):
-			agent = GridWorldAgent(width=width, height=height, rewardValues={reward_location: 10}, softmax=softmax, diagonal=diag)
-			agent.Run()
-			np.save(os.path.join(dir_name, "%04d" % (reward_location)), agent.mdp.policy)
+	if not os.path.isfile(filename + ".npy"):
+		agent = GridWorldAgent(width=width, height=height, rewardValues={reward_location: 10}, softmax=softmax, diagonal=diag)
+		agent.Run()
+		np.save(os.path.join(dir_name, "%04d" % (reward_location)), agent.mdp.policy)
 
 if __name__ == '__main__':
 	if len(sys.argv) < 5:
