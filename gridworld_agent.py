@@ -27,7 +27,8 @@ class GridWorldAgent(object):
             t (matrix): Transition matrix. T[SO,A,SF] contains the probability that agent will go from SO to SF after taking action A.
             policy_moves(list): move to take in each state given maxing
         """
-        self.map = Map(diagonal=True)
+        self.map = Map(diagonal=diagonal)
+        self.includeDiagonal = diagonal
         # fill states, transition, actions
         self.width = width
         if height == None:
@@ -55,7 +56,12 @@ class GridWorldAgent(object):
         if not rewardValues:
             rewardValues = {(1,1):10, (self.width,self.height): -10}
         self.rewardLocations = rewardValues
-        rewards = np.full((len(self.a), len(self.s)), -1)
+        # everything starts at -1, a move costs
+        rewards = np.full((len(self.a), len(self.s)), -1.0)
+        # now, change all diagonals
+        if self.includeDiagonal:
+            for action in range(4, 8):
+                rewards[action,:] = -1.414
         # transform coordinates to states
         stateRewards = {}
         for coord, val in rewardValues.iteritems():
