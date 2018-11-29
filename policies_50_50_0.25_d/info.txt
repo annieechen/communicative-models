@@ -1,0 +1,4 @@
+Width: 50
+Height: 50
+Softmax: 0.25
+Diag: True
