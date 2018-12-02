@@ -22,7 +22,7 @@ class PathConverter(object):
         scaled = self.scale_data(self.raw_data)
         if remove_duplicates:
             scaled = self.remove_duplicates(scaled)
-            # scaled = self.replace_with_diagonals(scaled)
+            scaled = self.replace_with_diagonals(scaled)
         if not self.include_diagonals:
             scaled = self.remove_diagonals(scaled)
         action_list = self.convert_coordstates_to_actions(scaled)

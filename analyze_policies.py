@@ -39,14 +39,14 @@ def get_prob_goal_directed(filename, numsamples):
     oh okay this is easy 
     """
     print("Processing %s" % filename)
-    b = GridWorldAgent(width=worldwidth,height=worldwidth,rewardValues =  {1:10}, softmax=0.2)
+    b = GridWorldAgent(width=worldwidth,height=worldwidth,rewardValues =  {1:10}, softmax=0.2, diagonal=diag)
     with open(os.path.join(actionlistdirectory, filename)) as f:
         l = f.readline()
         action_list = [int(x) for x in l.split(',')]
     state_lists = b.genManyStateListsFromAction(action_list, numsamples)
     res = {}
     for state_list in state_lists:
-        guesser = RewardGuesser(policies_dirname, action_list, state_list, worldwidth**2)
+        guesser = RewardGuesser(policies_dirname, action_list, state_list, worldwidth**2, diagonal=diag)
         # here, I want the guesser to just give me the marginal prob
         prob = guesser.genAverageLikelihood()
         # index in by start state
@@ -57,8 +57,8 @@ def get_prob_goal_directed(filename, numsamples):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 5:
-        print("usage: python analyze_policies [actionlistdirectory] [policiesdirectory] [worldwidth] [numsamples")
+    if len(sys.argv) < 6:
+        print("usage: python analyze_policies [actionlistdirectory] [policiesdirectory] [worldwidth] [numsamples] [-d]")
         exit(1)
     global actionlistdirectory
     actionlistdirectory = sys.argv[1]
@@ -67,6 +67,12 @@ if __name__ == '__main__':
     global worldwidth
     worldwidth = int(sys.argv[3])
     numsamples = int(sys.argv[4])
+    global diag
+    if len(sys.argv) == 7 and sys.argv[6] == "-d":
+        diag = True
+    else:
+        diag = False 
+
     # make directory for output results
     global paths_output_dirname
     paths_output_dirname = os.path.basename(os.path.normpath(actionlistdirectory)) + "_results_%stries" % numsamples

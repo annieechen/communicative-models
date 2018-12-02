@@ -10,17 +10,16 @@ import random
 import os
 
 
-Actions = range(8)
-ActionNames = ["L", "R", "U", "D"]# "UL", "UR", "DL", "DR"]
 
 class RewardGuesser(object):
 	# Dirname = the directory where the npy files are stored
-	def __init__(self, dirname, action_list, path_list,size_world):
+	def __init__(self, dirname, action_list, path_list,size_world, diagonal=False):
 		self.dirname = dirname
 		self.action_list = action_list
 		self.path_list = path_list
 		# this should be width * height 
 		self.size_world = size_world
+		self.num_actions = 8 if diagonal else 4
 	
 
 	# just assuming 1 reward
@@ -55,7 +54,7 @@ class RewardGuesser(object):
 			if state == reward_location:
 				reward_seen = True
 			if reward_seen:
-				prob_list.append(1.0/len(ActionNames))
+				prob_list.append(1.0/self.num_actions)
 			else:
 				prob_list.append(probabilities[action,state])
 		return prob_list
