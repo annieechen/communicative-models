@@ -29,33 +29,33 @@ class GridWorldAgent(object):
         """
         self.map = Map(diagonal=diagonal)
         self.includeDiagonal = diagonal
+        self.rewardWhenReached = rewardWhenReached
         # fill states, transition, actions
         self.width = width
+        self.softmax = softmax
         if height == None:
             self.height = width
         else:
             self.height = height
-        self.s, self.t, self.a = self.map.BuildGridWorld(self.width, self.height, diagonal)
-
-        self.rewardWhenReached = rewardWhenReached
-        self.rewardLocations = None
-        self.r = self._CreateRewards(rewardValues)
-        self.mdp = MDP(self.s,self.a,self.t,self.r, tau =softmax)
+        self.rewardLocations = rewardValues
         # self.policy_moves = None
         self.policy = None
         # pdb.set_trace()
+        self._BuildAgent(rewardValues)
         self.hasRun = False
         if not self.mdp.Validate():
             raise AssertionError
+
+    def _BuildAgent(self, rewardValues):
+        self.s, self.t, self.a = self.map.BuildGridWorld(self.width, self.height, self.includeDiagonal)
+        self.r = self._CreateRewards(rewardValues)
+        self.mdp = MDP(self.s,self.a,self.t,self.r, tau=self.softmax)
+
 
     def _CreateRewards(self, rewardValues=False, display=False):
         """
         valsDict (dictionary): maps (x,y) to reward of state
         """
-        # initialize to default
-        if not rewardValues:
-            rewardValues = {(1,1):10, (self.width,self.height): -10}
-        self.rewardLocations = rewardValues
         # everything starts at -1, a move costs
         rewards = np.full((len(self.a), len(self.s)), -1.0)
         # now, change all diagonals
@@ -180,7 +180,8 @@ class GridWorldAgent(object):
         return action_list, coord_path_list, state_path_list
 
     # should also be deprecated, I think I shouldnt need the raw state number to to do this
-    def takeListGetPath(self, x_y_list):
+    """
+    takeListGetPath(self, x_y_list):
         state_list = []
         action_list = []
         curr_x, curr_y = x_y_list[0]
@@ -217,6 +218,7 @@ class GridWorldAgent(object):
             if len(action_list) != len(state_list):
                 print(x,y,past_x, past_y)
         return action_list, state_list
+    """
 
     def takeStateListGetCoordList(self, state_list, includeStartState=True):
         coord_list = []
@@ -274,8 +276,8 @@ class GridWorldAgent(object):
     # generates all paths of length n
     # returns list of (action_list, state_list) tupics
     def genAllPaths(self, n):
-        action_map = ["L", "R", "U", "D"]#, "UL", "UR", "DL", "DR"]
-        action_lists = product(range(4), repeat=n)
+        action_map = ["L", "R", "U", "D", "UL", "UR", "DL", "DR"]
+        action_lists = product(range(8), repeat=n)
         results = []
         for actions in action_lists:
             action_list, state_list = [], []
@@ -309,38 +311,53 @@ class GridWorldAgent(object):
     def getMiddleOfMap(self):
         return self.width//2, self.height//2
 
-    def getLikelihoodOfPath(self, action_list, path_list):
+    def getLikelihoodOfPath(self, action_list, path_list, policy):
         if not self.hasRun:
             self.Run()
-        probabilities = self.mdp.policy
+        # if not np.any(policy):
+        #   policy = self.mdp.policy
         prob_list = []
         product_probabilities = 1
         for i in range(len(action_list)):
             action, state = action_list[i], path_list[i]
-            product_probabilities *= (probabilities[action,state])
+            product_probabilities *= (policy[action,state])
             # print(state)
             if state in self.rewardLocations and len(self.rewardLocations) == 1:
-            	# print("found reward, stopped counting")
-            	break
+                # print("found reward, stopped counting")
+                break
         return product_probabilities
 
 
-    def getLikelihoodAllPaths(self, lengthofPath, display=False, topthree=False):
-    	results = self.genAllPaths(lengthofPath)
+    def getLikelihoodAllPaths(self, lengthofPath, policies, display=False, topthree=False):
+        results = self.genAllPaths(lengthofPath)
 
         coordAndLikelihood = []
         for path in results:
             action_list, state_list = path
-            likelihood = self.getLikelihoodOfPath(action_list, state_list)
+            total_likelihood = 0.0
+            for policy in policies:
+                this_likelihood = self.getLikelihoodOfPath(action_list, state_list, policy)
+                total_likelihood += this_likelihood
             coord_list = self.takeStateListGetCoordList(state_list)
-            coordAndLikelihood.append((np.array(coord_list), likelihood))
+            coordAndLikelihood.append((np.array(coord_list), total_likelihood))
         if display:
-        	self.displayAllPaths(coordAndLikelihood, topthree=topthree)
+            self.displayAllPaths(coordAndLikelihood, topthree=topthree)
         return coordAndLikelihood
+
+    def gen_policy_for_each_reward(self):
+        policies = []
+        for rewardValue in self.rewardLocations:
+            self._BuildAgent({rewardValue: 10})
+            self.Run()
+            policies.append(np.copy(self.mdp.policy))
+        return policies
+
+
+
     def displayAllPaths(self, coordAndLikelihood, topthree=False):
         # sort list so paths with highest likelihood are last
         coordAndLikelihood.sort(key = lambda x:x[1])
-
+        self.r = self._CreateRewards(self.rewardLocations)
         data = np.zeros((self.height, self.width))
         # highlight reward values
         for state, val in self.rewardLocations.iteritems():
@@ -360,8 +377,8 @@ class GridWorldAgent(object):
 
         # each path
         if topthree:
-        	coordAndLikelihood = coordAndLikelihood[0:3] + coordAndLikelihood[-3:]
-        	# print(coordAndLikelihood)
+            coordAndLikelihood = coordAndLikelihood[0:3] + coordAndLikelihood[-3:]
+            # print(coordAndLikelihood)
         logged_likelihoods = [-1 * log(i[1]) for i in coordAndLikelihood]
         logged_color_list = [float(i)/max(logged_likelihoods) for i in logged_likelihoods]
         normal_color_list = [float(i[1])/(max(coordAndLikelihood, key=lambda x:x[1])[1]) for i in coordAndLikelihood]
