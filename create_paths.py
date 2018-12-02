@@ -1,4 +1,5 @@
 import csv
+import pdb
 
 ActionNames = ["L", "R", "U", "D", "UL", "UR", "DL", "DR"]
 
@@ -29,7 +30,7 @@ P = ['D','D','DL','L','L']
 
 PARTS = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]
 
-paths = [None] * 27
+paths = [None] *23
 
 
 paths[0] = "akdo" # BeenHereBeforeButNotHome, middle, bottom
@@ -55,17 +56,17 @@ paths[19] = "ihpe" # ReturnsHome
 paths[20] = "ebah" # ReturnsHomeSymmetrically
 paths[21] = "ifgp" # ReturnsHomeSymmetrically
 paths[22] = "ihep" # ReturnsHomeSymmetrically
-paths[23] = "eaaa" #Warm-up1
-paths[24] = "inol" #Warm-up2
-paths[25] = "aagd" #Warm-up3
-paths[26] = "aain" #Warm-up4
+# paths[23] = "eaaa" #Warm-up1
+# paths[24] = "inol" #Warm-up2
+# paths[25] = "aagd" #Warm-up3
+# paths[26] = "aain" #Warm-up4
 
 test = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm','n', 'o', 'p']
 
-LENGTH = 21
+# LENGTH = 21
 
-def remove_third(l):
-	return l[0:1] + l[3:4] + l[6:7]
+# def remove_third(l):
+# 	return l[0:1] + l[3:4] + l[6:7]
 
 
 for path in paths:
@@ -73,35 +74,13 @@ for path in paths:
 	for c in path:
 		part_index = ord(c) - 97
 		action_list += PARTS[part_index]
-
-	vertical_range = 0
-	horizontal_range = 0
-	max_v = 0
-	max_h = 0
-	min_v = 0
-	min_h = 0
-	states_list = []
-	currx, curry = LENGTH // 2, LENGTH // 2 
+	action_indexes = []
 	for action in action_list:
-		if curry < 0 or curry > 40 or currx < 0 or currx > 40:
-			print(currx, curry)
-		states_list.append((currx, curry))
-		if 'U' in action:
-			curry += 1
-			# max_v += 1
-		if 'D' in action:
-			curry -= 1
-			# min_v -= 1
-		if 'R' in action:
-			# max_h += 1
-			currx += 1
-		if 'L' in action:
-			# min_h -= 1
-			currx -= 1
+		action_indexes.append(ActionNames.index(action))
 
-	with open("b_data/"+path, 'w+') as f:
+	with open("generated_action_lists_len25_d/"+path, 'w+') as f:
 		writer = csv.writer(f)
-		writer.writerows(states_list)
+		writer.writerow(action_indexes)
 		print("finished writing to " + path)
 
 	# print("%s %i %i | %i %i" % (path, min_h, min_v, max_h, max_v))
