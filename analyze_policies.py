@@ -81,4 +81,5 @@ if __name__ == '__main__':
         os.makedirs(paths_output_dirname)
     for filename in os.listdir(actionlistdirectory):
         # if filename.startswith(letter):
-        get_prob_goal_directed(filename, numsamples)
+	if not os.path.isfile(os.path.join(paths_output_dirname, filename)):
+		get_prob_goal_directed(filename, numsamples)
