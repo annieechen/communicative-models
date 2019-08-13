@@ -77,7 +77,7 @@ class RewardGuesser(object):
 			prob_array = self.getProbActionsToRewards(i)
 			final_probs[i] = np.array(prob_array)
 		# sum up probabilies over each column
-		return final_probs.sum(axis=0)
+		return final_probs.sum(axis=0)/self.size_world
 
 	def getMarginalProb(self):
 		final_probs_dict = self.simpleGuessReward(self.action_list, self.path_list)

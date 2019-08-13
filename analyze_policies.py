@@ -11,7 +11,7 @@ def to_csv(d, old_filename):
     with open(new_filename, 'w+') as f:
         for key in d:
             # start state, probability  at each state
-            f.write("%s,%s\n"%(key,map(str, d[key])))
+            f.write("%s,%s\n"%(key,','.join(map(str, d[key]))))
 # no I don't super remember what this function does, not used
 # def process(filename):
 #     b = GridWorldAgent(width=sizeworld,height=sizeworld,rewardValues =  {1:10}, softmax=0.2)
