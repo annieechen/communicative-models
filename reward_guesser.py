@@ -68,6 +68,16 @@ class RewardGuesser(object):
 		sum_of_probs_over_world = np.sum(final_probs)
 		return sum_of_probs_over_world
 
+# Returns 1-d array of probabilities per action
+	def genLikelihoodPerAction(self):
+		action_list = self.action_list
+		# rows = each state, column = action/state combo
+		final_probs = np.zeros((self.size_world,len(self.action_list)))
+		for i in range(self.size_world):
+			prob_array = self.getProbActionsToRewards(i)
+			final_probs[i] = np.array(prob_array)
+		# sum up probabilies over each column
+		return final_probs.sum(axis=0)
 
 	def getMarginalProb(self):
 		final_probs_dict = self.simpleGuessReward(self.action_list, self.path_list)

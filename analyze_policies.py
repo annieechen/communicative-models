@@ -10,21 +10,23 @@ def to_csv(d, old_filename):
     new_filename = os.path.join(paths_output_dirname, old_filename)
     with open(new_filename, 'w+') as f:
         for key in d:
-            f.write("%s,%s\n"%(key,d[key]))
-# no I don't super remember what this function does
-def process(filename):
-    b = GridWorldAgent(width=sizeworld,height=sizeworld,rewardValues =  {1:10}, softmax=0.2)
-    with open(os.path.join(paths_dirname, filename)) as csvfile:
-        reader = csv.reader(csvfile)
-        data = list(reader)
-    print(filename)
-    data = [(int(x),int(y)) for (x,y) in data]
-    action_list, path_list = b.takeListGetPath(data)
-    guesser = RewardGuesser(policies_dirname, action_list, path_list, sizeworld)
-    # this returns a dict for each csv, key from 0 to w * h, val is list from of probabilities
-    res = guesser.getMarginalProb()
-    to_csv(res, filename)
-    return res
+            # start state, probability  at each state
+            f.write("%s,%s\n"%(key,map(str, d[key])))
+# no I don't super remember what this function does, not used
+# def process(filename):
+#     b = GridWorldAgent(width=sizeworld,height=sizeworld,rewardValues =  {1:10}, softmax=0.2)
+#     with open(os.path.join(paths_dirname, filename)) as csvfile:
+#         reader = csv.reader(csvfile)
+#         data = list(reader)
+#     print(filename)
+#     data = [(int(x),int(y)) for (x,y) in data]
+#     action_list, path_list = b.takeListGetPath(data)
+#     guesser = RewardGuesser(policies_dirname, action_list, path_list, sizeworld)
+#     # this returns a dict for each csv, key from 0 to w * h, val is list from of probabilities
+#     res = guesser.getMarginalProb()
+#     to_csv(res, filename)
+#     return res
+
 
     # I am just writing out what should happen
 def get_prob_goal_directed(filename, numsamples):
@@ -32,11 +34,10 @@ def get_prob_goal_directed(filename, numsamples):
     so i have a list of actions and a dimension for gridworld
     what I want is to first get a list of start locations where the action list could happen in that world
     I do that by randomly sampling a start location and retrying when I hit an edge
-    - there, I wan tto know the number of tries it took to get X succsesful starts, and where those starts are
+    - there, I want to know the number of tries it took to get X succsesful starts, and where those starts are
     so if I have 50 action list and start locations
     for each of those lists, I need to run reward guesser on them, using the np arrays
     and average all those values 
-    oh okay this is easy 
     """
     print("Processing %s" % filename)
     b = GridWorldAgent(width=worldwidth,height=worldwidth,rewardValues =  {1:10}, softmax=0.2, diagonal=diag)
@@ -48,7 +49,7 @@ def get_prob_goal_directed(filename, numsamples):
     for state_list in state_lists:
         guesser = RewardGuesser(policies_dirname, action_list, state_list, worldwidth**2, diagonal=diag)
         # here, I want the guesser to just give me the marginal prob
-        prob = guesser.genAverageLikelihood()
+        prob = guesser.genLikelihoodPerAction()
         # index in by start state
         res[state_list[0]] = prob
     to_csv(res, filename)
