@@ -27,9 +27,13 @@ def to_csv(d, old_filename):
 #     to_csv(res, filename)
 #     return res
 
+def np_to_csv(d, old_filename):
+    new_filename = os.path.join(paths_output_dirname, old_filename)
+    numpy.savetxt("new_filename" + ".csv", d, delimiter=",")
+
 
     # I am just writing out what should happen
-def get_prob_goal_directed(filename, numsamples):
+def get_prob_goal_directed(filename):
     """
     so i have a list of actions and a dimension for gridworld
     what I want is to first get a list of start locations where the action list could happen in that world
@@ -44,22 +48,19 @@ def get_prob_goal_directed(filename, numsamples):
     with open(os.path.join(actionlistdirectory, filename)) as f:
         l = f.readline()
         action_list = [int(x) for x in l.split(',')]
-    state_lists = b.genManyStateListsFromAction(action_list, numsamples)
-    res = {}
-    for state_list in state_lists:
-        guesser = RewardGuesser(policies_dirname, action_list, state_list, worldwidth**2, diagonal=diag)
-        # here, I want the guesser to just give me the marginal prob
-        prob = guesser.genLikelihoodPerAction()
-        # index in by start state
-        res[state_list[0]] = prob
-    to_csv(res, filename)
+    state_list = b.takeActionListGetStateList(action_list, 60, 60)
+   
+    guesser = RewardGuesser(policies_dirname, action_list, state_list, worldwidth**2, diagonal=diag)
+    # nope- here, I want the guesser to just give me the marginal prob
+    res = guesser.genForCSV()
+    np_to_csv(res, filename)
 
 
 
 
 if __name__ == '__main__':
     if len(sys.argv) < 6:
-        print("usage: python analyze_policies [actionlistdirectory] [policiesdirectory] [worldwidth] [numsamples] [-d]")
+        print("usage: python analyze_policies [actionlistdirectory] [policiesdirectory] [worldwidth] [-d]")
         exit(1)
     global actionlistdirectory
     actionlistdirectory = sys.argv[1]
@@ -76,10 +77,10 @@ if __name__ == '__main__':
 
     # make directory for output results
     global paths_output_dirname
-    paths_output_dirname = os.path.basename(os.path.normpath(actionlistdirectory)) + "_results_%stries" % numsamples
+    paths_output_dirname = os.path.basename(os.path.normpath(actionlistdirectory)) + "_results"
     if not os.path.exists(paths_output_dirname):
         os.makedirs(paths_output_dirname)
     for filename in os.listdir(actionlistdirectory):
         # if filename.startswith(letter):
 	if not os.path.isfile(os.path.join(paths_output_dirname, filename)):
-		get_prob_goal_directed(filename, numsamples)
+		get_prob_goal_directed(filename)

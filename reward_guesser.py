@@ -59,6 +59,26 @@ class RewardGuesser(object):
 				prob_list.append(probabilities[action,state])
 		return prob_list
 
+	def getProbActionsToRewardsAtEachState(self, reward_location):
+		action_list = self.action_list
+		path_list = self.path_list
+		# build the policies for this reward matrix
+		probabilities = self.getProbActions(reward_location)
+		reward_seen = False
+		prob_list = []
+		prev_prob = 1.0
+		for i in range(len(action_list)):
+			action, state = action_list[i], path_list[i]
+			if state == reward_location:
+				reward_seen = True
+			if reward_seen:
+				prob = 1.0/self.num_actions
+			else:
+				prob = probabilities[action,state]
+			prob_list.append(prob * prev_prob)
+			prev_prob = prob
+		return prob_list
+
 	def genAverageLikelihood(self):
 		action_list = self.action_list
 		final_probs = np.zeros(self.size_world)
@@ -67,6 +87,13 @@ class RewardGuesser(object):
 			final_probs[i] = np.prod(np.array(prob_array))  
 		sum_of_probs_over_world = np.sum(final_probs)
 		return sum_of_probs_over_world
+
+	def genForCSV(self):
+		action_list = self.action_list
+		final_probs = np.zeros((self.size_world, len(self.action_list)))
+		for i in range(self.size_world):
+			final_probs[i] = self.getProbActionsToRewardsAtEachState(i)
+		return final_probs
 
 # Returns 1-d array of probabilities per action
 	def genLikelihoodPerAction(self):
