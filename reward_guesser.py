@@ -90,8 +90,10 @@ class RewardGuesser(object):
 
 	def genForCSV(self):
 		action_list = self.action_list
-		final_probs = np.zeros((self.size_world, len(self.action_list)))
+		final_probs = {} 
 		for i in range(self.size_world):
+			if reward_location % 10 > 0
+            	return
 			final_probs[i] = self.getProbActionsToRewardsAtEachState(i)
 		return final_probs
 

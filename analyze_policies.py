@@ -53,13 +53,13 @@ def get_prob_goal_directed(filename):
     guesser = RewardGuesser(policies_dirname, action_list, state_list, worldwidth**2, diagonal=diag)
     # nope- here, I want the guesser to just give me the marginal prob
     res = guesser.genForCSV()
-    np_to_csv(res, filename)
+    to_csv(res, filename)
 
 
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 6:
+    if len(sys.argv) < 5:
         print("usage: python analyze_policies [actionlistdirectory] [policiesdirectory] [worldwidth] [-d]")
         exit(1)
     global actionlistdirectory
@@ -68,9 +68,8 @@ if __name__ == '__main__':
     policies_dirname = sys.argv[2]
     global worldwidth
     worldwidth = int(sys.argv[3])
-    numsamples = int(sys.argv[4])
     global diag
-    if len(sys.argv) == 7 and sys.argv[6] == "-d":
+    if len(sys.argv) == 6 and sys.argv[5] == "-d":
         diag = True
     else:
         diag = False 
